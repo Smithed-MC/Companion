@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.smithed.smithed_companion.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "MinecraftServerMixin",
+    "TemptGoalMixin",
+    "ResourcePackManagerMixin"
+  ],
+  "client": [
+    "ItemStackMixin",
+    "TitleScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
