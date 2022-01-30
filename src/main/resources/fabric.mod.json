@@ -6,20 +6,25 @@
   "name": "Smithed Companion",
   "description": "This is the companion mod for smithed, DO NOT DISABLE",
   "authors": [
-    "dragoncommands"
+    "dragoncommands (Mod developer)",
+    "TheNuclearNexus (Web app developer)"
   ],
   "contact": {
     "homepage": "https://smithed.dev/",
     "sources": "https://github.com/Smithed-MC/smithed-companion/tree/main"
   },
 
+  "accessWidener": "smithed.accesswidener",
   "license": "CC0-1.0",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.smithed.smithed_companion.SmithedMain"
+      "dev.smithed.companion.SmithedMain"
+    ],
+    "client": [
+      "dev.smithed.companion.SmithedMainClient"
     ]
   },
   "mixins": [

@@ -1,12 +1,13 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.smithed.smithed_companion.mixin",
+  "package": "dev.smithed.companion.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MinecraftServerMixin",
-    "TemptGoalMixin",
-    "ResourcePackManagerMixin"
+    "ResourcePackManagerMixin",
+    "SpawnerRendererMixin",
+    "TemptGoalMixin"
   ],
   "client": [
     "ItemStackMixin",
