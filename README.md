@@ -55,5 +55,5 @@
 
 - Shortcuts, datapack devs can specify shortcut commands within their datapacks, converting `/function foo:bar/bam/bop` -> `/bop`
 
-- TODO: yav please fill this out  so i can use it as a TODO list :)
+- TODO: yav please fill this out, so I can use it as a TODO list :)
 
