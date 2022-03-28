@@ -1,6 +1,7 @@
 package dev.smithed.companion;
 
 import com.google.gson.Gson;
+import dev.smithed.companion.events.EventUtils;
 import dev.smithed.companion.item_groups.ItemGroupData;
 import dev.smithed.companion.item_groups.SimplifiedItemGroupEntry;
 import dev.smithed.companion.packets.PacketUtils;
@@ -31,13 +32,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class SmithedMain implements ModInitializer {
 
-	public static Logger logger = LogManager.getLogger();
+	public static Logger logger = LogManager.getLogger("Smithed");
 	public static String MODID = "smithed";
 	public static Gson gson = new Gson();
 	private static MinecraftServer server;
 
-	// To be stored on the server, this group is then distributed to clients
-	public static Map<String, ItemGroupData> unregisteredItemGroups = new HashMap<>();
 	// This is used by the clients to hold a reference of registered item groups
 	public static Map<String, ItemGroup> registeredItemGroups = new HashMap<>();
 
@@ -53,7 +52,7 @@ public class SmithedMain implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(SmithedMain::clearServer);
 
 		PacketUtils.registerServerPacketListeners();
-
+		EventUtils.RegisterEvents();
 
 		registerSmithedReloadListeners();
 		logger.info("Initialized");

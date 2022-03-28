@@ -17,7 +17,7 @@ public class SmithedMainClient implements ClientModInitializer {
 
         PacketUtils.registerClientPacketListeners();
 
-        ClientCommandManager.DISPATCHER.register(ClientCommandManager.literal("foo").executes(context -> {
+        ClientCommandManager.DISPATCHER.register(ClientCommandManager.literal("reload_groups").executes(context -> {
             System.out.println("Called foo with no arguments");
             PacketByteBuf buf = PacketByteBufs.create();
 

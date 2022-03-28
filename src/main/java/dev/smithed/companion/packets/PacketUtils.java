@@ -1,5 +1,6 @@
 package dev.smithed.companion.packets;
 
+import dev.smithed.companion.PostReloadListener;
 import dev.smithed.companion.SmithedMain;
 import dev.smithed.companion.item_groups.ItemGroupData;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -7,6 +8,8 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -22,11 +25,10 @@ public class PacketUtils {
     public static Map<Identifier, ServerPlayNetworking.PlayChannelHandler> ServerPacketMap = Map.ofEntries(
             // processes and sends itemgroup info.
             Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), (server, player, handler, buf, responseSender) -> {
-                for (ItemGroupData data : SmithedMain.unregisteredItemGroups.values()) {
+                for (ItemGroupData data : PostReloadListener.unregisteredItemGroups.values()) {
                     PacketByteBuf groupBuffer = PacketByteBufs.create();
                     NbtCompound group = new NbtCompound();
                     data.toNbt(group);
-                    SmithedMain.logger.info(group.toString());
                     groupBuffer.writeNbt(group);
                     SP2C(player, new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), groupBuffer);
                 }
@@ -45,10 +47,12 @@ public class PacketUtils {
             Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), (client, handler, buf, responseSender) -> {
 
                 ItemGroupData itemGroupData = ItemGroupData.fromNBT(Objects.requireNonNull(buf.readUnlimitedNbt()));
+                // NOT the best way to do this
+                // but screw you, Quick and dirty
+                DefaultedList<ItemStack> stacks = DefaultedList.of();
                 if(!SmithedMain.registeredItemGroups.containsKey(itemGroupData.getName()))
                     SmithedMain.registeredItemGroups.put(itemGroupData.getName(), itemGroupData.toItemGroup());
                 else {
-                    DefaultedList<ItemStack> stacks = DefaultedList.of();
                     stacks.addAll(itemGroupData.getItemStacks());
                     SmithedMain.registeredItemGroups.get(itemGroupData.getName()).appendStacks(stacks);
                 }

@@ -2,21 +2,23 @@ package dev.smithed.companion.item_groups;
 
 import com.google.gson.*;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.smithed.companion.PostReloadListener;
 import dev.smithed.companion.SmithedMain;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.minecraft.item.Item;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class ItemGroupData {
 
@@ -26,6 +28,8 @@ public class ItemGroupData {
         this.texture = texture;
         this.itemStacks = stacks;
     }
+
+    public static List<String> BLACKLIST = List.of("inventory","hotbar");
 
     private final String name;
     private final ItemStack icon;
@@ -88,7 +92,7 @@ public class ItemGroupData {
         FabricItemGroupBuilder group = FabricItemGroupBuilder.create(new Identifier(this.name));
         group.icon(this::getIcon);
         group.appendItems(stacks -> stacks.addAll(this.getItemStacks()));
-        return group.build();
+        return group.build().setTexture("tab_item_search");
     }
 
     // Adds items to pre-formed group, this will not work with registered groups
@@ -98,11 +102,12 @@ public class ItemGroupData {
     }
     public void addItems(List<ItemStack> stacks) { itemStacks.addAll(stacks); }
 
-    public static void loadItemGroupData(InputStream stream, Identifier id, Map<String,List<SimplifiedItemGroupEntry>> providedMap) {
+    public static void loadItemGroupData(InputStream stream, Identifier id) {
         Gson gson = new Gson();
 
         SimplifiedItemGroup simplifiedGroup = gson.fromJson(new InputStreamReader(stream), SimplifiedItemGroup.class);
         if(simplifiedGroup != null) {
+            PostReloadListener.queuedGroupAdditions.putIfAbsent(simplifiedGroup.getID(), new ArrayList<>());
 
             // Create a temporary list for non-linear grouping
             List<SimplifiedItemGroupEntry> queue = new ArrayList<>();
@@ -125,22 +130,21 @@ public class ItemGroupData {
 
                 }
                 // add to unregistered groups to be applied upon client request
-                SmithedMain.unregisteredItemGroups.put(simplifiedGroup.getID(), new ItemGroupData(
+                PostReloadListener.unregisteredItemGroups.put(simplifiedGroup.getID(), new ItemGroupData(
                         simplifiedGroup.getID(),
                         icon,
                         simplifiedGroup.getTexture(),
                         stacks
                 ));
-                return;
+
             } else if (simplifiedGroup.getOperation().equals("smithed:append")) {
 
-                return;
+                queue.addAll(Arrays.stream(simplifiedGroup.getEntries()).toList());
             }
 
             // put into list
-            if (providedMap.get(simplifiedGroup.getName()).isEmpty()|| !providedMap.containsKey(simplifiedGroup.getName()))
-                providedMap.put(simplifiedGroup.getName(), queue);
-            providedMap.get(simplifiedGroup.getName()).addAll(queue);
+            PostReloadListener.queuedGroupAdditions.get(simplifiedGroup.getID()).addAll(queue);
+            return;
         }
         SmithedMain.logger.warn("Invalid item group: {}, fix this group or remove it.", id.toString());
     }
@@ -156,5 +160,16 @@ public class ItemGroupData {
             SmithedMain.logger.error(errMsg + " of item: " + stack + ", with NBT: " + entry.getNbt() + ", could not be parsed due to NBT Exception");
         }
         return stack;
+    }
+
+    public static void addItemsToVanillaItemGroup(String name, DefaultedList<ItemStack> stacks) {
+        for (ItemGroup itemGroup : ItemGroup.GROUPS) {
+            if(BLACKLIST.contains(name)) {
+                SmithedMain.logger.error("This group {} cannot be found or is blacklisted for addition!", itemGroup.getName());
+                break;
+            }
+            itemGroup.appendStacks(stacks);
+
+        }
     }
 }
