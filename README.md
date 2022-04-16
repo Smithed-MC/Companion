@@ -37,7 +37,7 @@
 
 - No vanilla durability text for items tagged with the `{smithed:{durability:{}}}` tag, solution? use smithed durability :)
 
-- Custom item groups, created within the folder of your datapacks and distrubuted to clients with the companion mod upon server join, and updated upon server reload. See [this](https://fabricmc.net/) for more info on itemgroups
+- Custom item groups, created within the folder of your datapacks and distrubuted to clients with the companion mod upon server join, and updated upon server reload. See [this](https://github.com/Smithed-MC/Companion/blob/1.18/wiki/Itemgroups.md) for more info on itemgroups.
 
 ## WIP Features
 
