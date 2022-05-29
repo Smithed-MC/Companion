@@ -17,6 +17,11 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.entity.EnchantingTableBlockEntity;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.HuskEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
@@ -53,6 +58,7 @@ public class SmithedMain implements ModInitializer {
 
 		PacketUtils.registerServerPacketListeners();
 		EventUtils.RegisterEvents();
+
 
 		registerSmithedReloadListeners();
 		logger.info("Initialized");

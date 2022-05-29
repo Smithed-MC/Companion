@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,7 +49,7 @@ public abstract class ItemStackMixin {
                 tooltips.remove(tooltips.size() - 3);
 
             if (getSmithed(nbt).get("identifier") != null)
-                tooltips.set(tooltips.size() -2, new LiteralText(getSmithed(nbt).getString("identifier")).formatted(Formatting.DARK_GRAY));
+                tooltips.set(tooltips.size() -2, Text.literal(getSmithed(nbt).getString("identifier")).formatted(Formatting.DARK_GRAY));
 
         }
 

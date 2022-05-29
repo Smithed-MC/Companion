@@ -6,7 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.brain.task.ForgetCompletedPointOfInterestTask;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.dynamic.GlobalPos;
+import net.minecraft.util.math.GlobalPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,7 +40,7 @@ public abstract class ForgetCompletedPointOfInterestTaskMixin {
             // check if barrel contains barrel block entity
             if(world.getBlockEntity(globalPos.getPos()) instanceof BarrelBlockEntity) {
                 // check for name :)
-                if (((BarrelBlockEntity) Objects.requireNonNull(world.getBlockEntity(globalPos.getPos()))).getName().asString().startsWith("§f")) {
+                if (((BarrelBlockEntity) Objects.requireNonNull(world.getBlockEntity(globalPos.getPos()))).getName().getString().startsWith("§f")) {
                     cir.setReturnValue(false);
                 }
             }

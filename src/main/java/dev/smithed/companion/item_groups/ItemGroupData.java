@@ -68,6 +68,8 @@ public class ItemGroupData {
         nbtCompound.putString("group_name",getName());
         // write items to nbt
         nbtCompound.put("item_group_items", items);
+
+        nbtCompound.putString("texture", getTexture());
     }
 
     public static ItemGroupData fromNBT(NbtCompound compound) {
@@ -81,7 +83,7 @@ public class ItemGroupData {
         return new ItemGroupData(
                 compound.getString("group_name"),
                 ItemStack.fromNbt(compound.getCompound("icon")),
-                null,
+                compound.getString("texture"),
                 stacks
         );
     }
@@ -92,7 +94,7 @@ public class ItemGroupData {
         FabricItemGroupBuilder group = FabricItemGroupBuilder.create(new Identifier(this.name));
         group.icon(this::getIcon);
         group.appendItems(stacks -> stacks.addAll(this.getItemStacks()));
-        return group.build().setTexture("tab_item_search");
+        return group.build().setTexture(this.texture != null ? this.texture : "gui/container/creative_inventory/tab_items");
     }
 
     // Adds items to pre-formed group, this will not work with registered groups

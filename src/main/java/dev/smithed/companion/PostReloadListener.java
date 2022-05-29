@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootManager;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextType;
@@ -41,8 +42,8 @@ public class PostReloadListener implements SimpleResourceReloadListener<Void> {
             if(!unregisteredItemGroups.isEmpty())
                 unregisteredItemGroups.clear();
 
-            manager.findResources("item_groups", (str) -> str.endsWith(".json")).forEach(id -> {
-                try (InputStream stream = manager.getResource(id).getInputStream()) {
+            manager.findResources("item_groups", (str) -> str.getPath().endsWith(".json")).forEach((id, res) -> {
+                try (InputStream stream = res.getInputStream()) {
                     ItemGroupData.loadItemGroupData(stream, id);
                 }
                 catch (IOException e) {
@@ -74,6 +75,7 @@ public class PostReloadListener implements SimpleResourceReloadListener<Void> {
             executor.execute(() -> {
                 for (Map.Entry<String, List<SimplifiedItemGroupEntry>> pair: queuedGroupAdditions.entrySet()) {
                     try {
+                        LootManager lootManager = getServer().getLootManager();
                         logger.info("Current group: " + pair.getKey());
                         List<ItemStack> stacks = DefaultedList.of();
                         for (SimplifiedItemGroupEntry entry : pair.getValue()) {
@@ -83,19 +85,21 @@ public class PostReloadListener implements SimpleResourceReloadListener<Void> {
                                     break;
                                 case "minecraft:loot_table":
                                     logger.info("Registered loot table: " + entry.getID());
-                                    LootTable table = getServer().getLootManager().getTable(Identifier.tryParse(entry.getID()));
+                                    LootTable table = lootManager.getTable(Identifier.tryParse(entry.getID()));
                                     logger.info(table.toString());
                                     stacks.addAll(table.generateLoot(new LootContext.Builder(getServer().getOverworld()).build(LootContextType.create().build())));
                                     break;
                                 case "smithed:loot_directory":
                                     logger.info("Registered loot directory: " + entry.getID());
 
+                                    /* - Commented out for usable build.
                                     Objects.requireNonNull(getServer()).getLootManager().getTableIds().forEach(id -> {
                                         logger.info("Available paths: " + Objects.requireNonNull(id.toString()) + ", \ndesired path: " + entry.getID());
                                         if(id.toString().startsWith(entry.getID())) {
                                             logger.info("found path:" + id.getPath());
                                         }
                                     });
+                                     */
                                     break;
                             }
                         }
@@ -104,6 +108,9 @@ public class PostReloadListener implements SimpleResourceReloadListener<Void> {
                     }
                     catch (NullPointerException e) {
                         logger.error("ItemGroup {} with intent to append doesn't exist.", pair.getKey());
+                    }
+                    catch (UnsupportedOperationException e) {
+                        logger.error("Attempted to access server too early to read loot tables.");
                     }
                 }
                 logger.info("Post-Reload item group setup complete");

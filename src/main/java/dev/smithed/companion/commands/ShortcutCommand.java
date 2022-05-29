@@ -6,7 +6,8 @@ import net.minecraft.command.argument.CommandFunctionArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.function.CommandFunction;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -34,9 +35,9 @@ public class ShortcutCommand {
         }
 
         if (functions.size() == 1) {
-            source.sendFeedback(new TranslatableText("commands.function.success.single", i, (functions.iterator().next()).getId()), true);
+            source.sendFeedback(Text.translatable("commands.function.success.single", i, (functions.iterator().next()).getId()), true);
         } else {
-            source.sendFeedback(new TranslatableText("commands.function.success.multiple", i, functions.size()), true);
+            source.sendFeedback(Text.translatable("commands.function.success.multiple", i, functions.size()), true);
         }
 
         return i;
