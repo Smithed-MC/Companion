@@ -22,6 +22,7 @@ import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HuskEntity;
 import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;

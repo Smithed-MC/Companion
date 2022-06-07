@@ -22,9 +22,7 @@ import static dev.smithed.companion.SmithedMain.*;
 public abstract class MinecraftServerMixin {
 
     @Shadow public abstract LootManager getLootManager();
-
     @Shadow public abstract ServerWorld getOverworld();
-
     @Inject(method = "loadDataPacks", at= @At("HEAD"))
     private static void injectLoadDatapacks(ResourcePackManager resourcePackManager, DataPackSettings dataPackSettings, boolean safeMode, CallbackInfoReturnable<DataPackSettings> cir) {
 
