@@ -20,10 +20,8 @@ import java.util.stream.Stream;
 public abstract class ResourcePackManagerMixin {
     @Shadow
     private Map<String, ResourcePackProfile> profiles;
-
     @Shadow
     public Set<ResourcePackProvider> providers;
-
     @Shadow
     private Stream<ResourcePackProfile> streamProfilesByName(Collection<String> names) {
         throw new AssertionError();
@@ -33,32 +31,26 @@ public abstract class ResourcePackManagerMixin {
     private void buildEnabledProfiles(Collection<String> enabledNames, CallbackInfoReturnable<List<ResourcePackProfile>> cir) {
         // Fetch smithed pack provider
         Optional<ResourcePackProvider> smithedProvider = this.providers.stream().filter(provider -> provider instanceof SmithedDataPackProvider).findFirst();
-
-        // List of all packs to be marked as enabled
-        List<ResourcePackProfile> allEnabledPacks = this.streamProfilesByName(enabledNames).collect(Collectors.toList());
-
-        // List of all packs loaded by smithed
-        List<ResourcePackProfile> smithedPacks = new ArrayList<>();
-
-
+        List<ResourcePackProfile>
+                EnabledPacks = this.streamProfilesByName(enabledNames).collect(Collectors.toList()),
+                SmithedPacks = new ArrayList<>();
         if (smithedProvider.isPresent() && ((SmithedDataPackProvider)smithedProvider.get()).orderedSmithedPacks.size() > 0) {
-            smithedPacks = this.streamProfilesByName(((SmithedDataPackProvider)smithedProvider.get()).orderedSmithedPacks).collect(Collectors.toList());
-            allEnabledPacks.removeAll(smithedPacks);
+            SmithedPacks = this.streamProfilesByName(((SmithedDataPackProvider)smithedProvider.get()).orderedSmithedPacks).collect(Collectors.toList());
+            EnabledPacks.removeAll(SmithedPacks);
         }
 
         // Register all smithed packs
-        for (ResourcePackProfile resourcePackProfile : smithedPacks) {
-            if (resourcePackProfile.isAlwaysEnabled() && !allEnabledPacks.contains(resourcePackProfile)) {
-                resourcePackProfile.getInitialPosition().insert(allEnabledPacks, resourcePackProfile, Functions.identity(), false);
+        for (ResourcePackProfile resourcePackProfile : SmithedPacks) {
+            if (resourcePackProfile.isAlwaysEnabled() && !EnabledPacks.contains(resourcePackProfile)) {
+                resourcePackProfile.getInitialPosition().insert(EnabledPacks, resourcePackProfile, Functions.identity(), false);
             }
         }
-
         for (ResourcePackProfile resourcePackProfile : this.profiles.values()) {
-            if (resourcePackProfile.isAlwaysEnabled() && !allEnabledPacks.contains(resourcePackProfile)) {
-                resourcePackProfile.getInitialPosition().insert(allEnabledPacks, resourcePackProfile, Functions.identity(), false);
+            if (resourcePackProfile.isAlwaysEnabled() && !EnabledPacks.contains(resourcePackProfile)) {
+                resourcePackProfile.getInitialPosition().insert(EnabledPacks, resourcePackProfile, Functions.identity(), false);
             }
         }
 
-        cir.setReturnValue(ImmutableList.copyOf(allEnabledPacks));
+        cir.setReturnValue(ImmutableList.copyOf(EnabledPacks));
     }
 }
