@@ -1,15 +1,18 @@
 package dev.smithed.companion;
 
 import com.google.gson.Gson;
-import dev.smithed.companion.events.EventUtils;
 import dev.smithed.companion.packets.PacketUtils;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +41,16 @@ public class SmithedMain implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(SmithedMain::clearServer);
 
 		PacketUtils.registerServerPacketListeners();
-		EventUtils.registerEvents();
 
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			handler.getPlayer().getScoreboardTags().remove("smithed.client");
+			SmithedMain.logger.info("removed tag: smithed.client");
+		});
+
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+			PacketUtils.SP2S(new Identifier(SmithedMain.MODID, "mark_companion_player"), PacketByteBufs.create());
+			PacketUtils.SP2S(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), PacketByteBufs.create());
+		});
 
 		registerSmithedReloadListeners();
 		logger.info("Initialized");
