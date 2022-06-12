@@ -8,8 +8,6 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -19,10 +17,9 @@ import java.util.Map;
 import java.util.Objects;
 
 public class PacketUtils {
-
     // everything within this map will be registered as a packet listener on the server side
     // is this the most efficient thing to do? probably not but im not making multiple classes to perform minor operations
-    public static Map<Identifier, ServerPlayNetworking.PlayChannelHandler> ServerPacketMap = Map.ofEntries(
+    public static Map<Identifier, ServerPlayNetworking.PlayChannelHandler> serverPacketMap = Map.ofEntries(
             // processes and sends itemgroup info.
             Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), (server, player, handler, buf, responseSender) -> {
                 for (ItemGroupData data : PostReloadListener.unregisteredItemGroups.values()) {
@@ -42,7 +39,7 @@ public class PacketUtils {
     );
 
     // everything within this map will be registered as a packet listener on the client side
-    public static Map<Identifier, ClientPlayNetworking.PlayChannelHandler> ClientPacketMap = Map.ofEntries(
+    public static Map<Identifier, ClientPlayNetworking.PlayChannelHandler> clientPacketMap = Map.ofEntries(
             // decodes itemgroup info
             Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), (client, handler, buf, responseSender) -> {
 
@@ -70,13 +67,12 @@ public class PacketUtils {
     }
 
     public static void registerServerPacketListeners() {
-        for (Identifier identifier: ServerPacketMap.keySet())
-            ServerPlayNetworking.registerGlobalReceiver(identifier, ServerPacketMap.get(identifier));
+        for (Identifier identifier : serverPacketMap.keySet())
+            ServerPlayNetworking.registerGlobalReceiver(identifier, serverPacketMap.get(identifier));
     }
 
     public static void registerClientPacketListeners() {
-        for (Identifier identifier: ClientPacketMap.keySet())
-            ClientPlayNetworking.registerGlobalReceiver(identifier, ClientPacketMap.get(identifier));
+        for (Identifier identifier : clientPacketMap.keySet())
+            ClientPlayNetworking.registerGlobalReceiver(identifier, clientPacketMap.get(identifier));
     }
-
 }

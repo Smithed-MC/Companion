@@ -5,12 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.smithed.companion.PostReloadListener;
 import dev.smithed.companion.SmithedMain;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
@@ -21,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ItemGroupData {
-
     public ItemGroupData(String name, ItemStack icon, String texture, List<ItemStack> stacks) {
         this.name = name;
         this.icon = icon;
@@ -29,7 +26,7 @@ public class ItemGroupData {
         this.itemStacks = stacks;
     }
 
-    public static List<String> BLACKLIST = List.of("inventory","hotbar");
+    public static List<String> BLACKLIST = List.of("inventory", "hotbar");
 
     private final String name;
     private final ItemStack icon;
@@ -102,6 +99,7 @@ public class ItemGroupData {
     public void addItems(ItemStack... stacks) {
         itemStacks.addAll(Arrays.stream(stacks).toList());
     }
+
     public void addItems(List<ItemStack> stacks) { itemStacks.addAll(stacks); }
 
     public static void loadItemGroupData(InputStream stream, Identifier id) {

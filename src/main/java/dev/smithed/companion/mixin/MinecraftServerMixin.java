@@ -20,14 +20,10 @@ import static dev.smithed.companion.SmithedMain.*;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
-
-    @Shadow public abstract LootManager getLootManager();
-    @Shadow public abstract ServerWorld getOverworld();
-    @Inject(method = "loadDataPacks", at= @At("HEAD"))
+    @Inject(method = "loadDataPacks", at = @At("HEAD"))
     private static void injectLoadDatapacks(ResourcePackManager resourcePackManager, DataPackSettings dataPackSettings, boolean safeMode, CallbackInfoReturnable<DataPackSettings> cir) {
-
-
         if (safeMode) return; // exit if in safemode
+
         // New provider for the Smithed directory
         SmithedDataPackProvider smProvider = new SmithedDataPackProvider(SmithedDataPacks); // fetch providers
         resourcePackManager.providers = new HashSet<>(resourcePackManager.providers); // set providers to existing providers
@@ -41,5 +37,4 @@ public abstract class MinecraftServerMixin {
         // Add and enable provider
         resourcePackManager.providers.add(smProvider);
     }
-
 }

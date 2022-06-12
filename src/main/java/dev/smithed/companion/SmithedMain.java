@@ -2,27 +2,11 @@ package dev.smithed.companion;
 
 import com.google.gson.Gson;
 import dev.smithed.companion.events.EventUtils;
-import dev.smithed.companion.item_groups.ItemGroupData;
-import dev.smithed.companion.item_groups.SimplifiedItemGroupEntry;
 import dev.smithed.companion.packets.PacketUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
-// getString(ctx, "string")
-import java.io.File;
-import java.nio.file.Path;
-import java.util.*;
-
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.entity.EnchantingTableBlockEntity;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.HuskEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
@@ -30,11 +14,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-// word()
-// literal("foo")
-// argument("bar", word())
-// Import everything
-
+import java.io.File;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SmithedMain implements ModInitializer {
 
@@ -47,18 +30,15 @@ public class SmithedMain implements ModInitializer {
 	public static Map<String, ItemGroup> registeredItemGroups = new HashMap<>();
 
 	// The global datapacks file loc
-	@Environment(EnvType.CLIENT)
 	public static File SmithedDataPacks = (Path.of(FabricLoader.getInstance().getGameDir().toString() + "/datapacks")).toFile();
-
 
 	@Override
 	public void onInitialize() {
-
 		ServerLifecycleEvents.SERVER_STARTING.register(SmithedMain::setServer);
 		ServerLifecycleEvents.SERVER_STOPPED.register(SmithedMain::clearServer);
 
 		PacketUtils.registerServerPacketListeners();
-		EventUtils.RegisterEvents();
+		EventUtils.registerEvents();
 
 
 		registerSmithedReloadListeners();

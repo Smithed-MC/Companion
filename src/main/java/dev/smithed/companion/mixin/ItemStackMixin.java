@@ -21,22 +21,16 @@ import static dev.smithed.companion.SmithedUtil.hasSmithedNBT;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-
     @Shadow private NbtCompound nbt;
 
-    @Shadow public abstract boolean isDamageable();
-
     @Inject(method = "getItemBarColor", at = @At("RETURN"), cancellable = true)
-    public void ItemBarColorInject(CallbackInfoReturnable<Integer> cir) {
+    public void itemBarColorInject(CallbackInfoReturnable<Integer> cir) {
         NbtList colorList = nbt.getCompound("smithed").getCompound("durability").getList("colors", NbtElement.INT_TYPE);
         if(hasSmithedNBT(nbt) && colorList != null && colorList.size() > 0) {
             // yes there was other code here but it didn't do anything because it was incomplete so i cut it out.
             cir.setReturnValue(colorList.getInt(0));
         }
     }
-
-
-
 
     // Very Jank Solution(because i can't inject into the middle of an IF statement) but... It Just Works
     // hope people aren't using this with other mods that modify tooltip code especially at the end!!!!
@@ -45,17 +39,13 @@ public abstract class ItemStackMixin {
         List<Text> tooltips = cir.getReturnValue();
         // edit: slashed the size and made some reusable methods because im lazy, screw you, me
         if(nbt != null && hasSmithedNBT(nbt) && context.isAdvanced() && tooltips != null) {
-            if (getSmithed(nbt).get("durability") != null && isDamageable())
+            if (getSmithed(nbt).get("durability") != null && ((ItemStack) (Object) this).isDamageable())
                 tooltips.remove(tooltips.size() - 3);
 
             if (getSmithed(nbt).get("identifier") != null)
                 tooltips.set(tooltips.size() -2, Text.literal(getSmithed(nbt).getString("identifier")).formatted(Formatting.DARK_GRAY));
-
         }
 
         cir.setReturnValue(tooltips);
     }
-
-
-
 }

@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-
 public class SmithedDataPackProvider extends FileResourcePackProvider {
     private static final FileFilter FILTERED_PACK = (file) -> (file.isFile() && file.getName().endsWith(".zip")) || (file.isDirectory() && (new File(file, "pack.mcmeta")).isFile());
 
     public List<String> orderedSmithedPacks = new ArrayList<>();
-
 
     public SmithedDataPackProvider(File packsFolder) {
         super(packsFolder, SmithedDataPackSource.PACK_SOURCE_SMITHED);
@@ -26,7 +24,6 @@ public class SmithedDataPackProvider extends FileResourcePackProvider {
         if (!this.packsFolder.isDirectory()) {
             this.packsFolder.mkdirs();
         }
-
 
         File[] packs = loadPacksFromFiles();
 
@@ -53,7 +50,6 @@ public class SmithedDataPackProvider extends FileResourcePackProvider {
         //load files in any order
         return this.packsFolder.listFiles(FILTERED_PACK);
     }
-
 
     private Supplier<ResourcePack> createResourcepack(File file) {
         return file.isDirectory() ? () -> new DirectoryResourcePack(file) : () -> new ZipResourcePack(file);
