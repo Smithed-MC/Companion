@@ -1,7 +1,5 @@
 package dev.smithed.companion.mixin;
 
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -12,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -32,20 +31,23 @@ public abstract class ItemStackMixin {
         }
     }
 
-    // Very Jank Solution(because i can't inject into the middle of an IF statement) but... It Just Works
-    // hope people aren't using this with other mods that modify tooltip code especially at the end!!!!
-    @Inject(method = "getTooltip", at = @At(value = "RETURN"), cancellable = true)
-    public void passAdvancedTest(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir) {
-        List<Text> tooltips = cir.getReturnValue();
-        // edit: slashed the size and made some reusable methods because im lazy, screw you, me
-        if(nbt != null && hasSmithedNBT(nbt) && context.isAdvanced() && tooltips != null) {
-            if (getSmithed(nbt).get("durability") != null && ((ItemStack) (Object) this).isDamageable())
-                tooltips.remove(tooltips.size() - 3);
+    @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isDamaged()Z"))
+    public boolean removeDurabilityWhenCustom(ItemStack itemStack) {
+        //prevent vanilla durability from showing up when the ItemStack has smithed durability
+        if (itemStack.getNbt() != null && hasSmithedNBT(nbt) && getSmithed(nbt).get("durability") != null)
+            return false;
 
-            if (getSmithed(nbt).get("identifier") != null)
-                tooltips.set(tooltips.size() -2, Text.literal(getSmithed(nbt).getString("identifier")).formatted(Formatting.DARK_GRAY));
-        }
+        return itemStack.isDamaged();
+    }
 
-        cir.setReturnValue(tooltips);
+    @Redirect(method = "getTooltip", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 16))
+    public <E> boolean modifyIdLine(List<E> list, E element) {
+        //add custom id when present, vanilla one when not
+        if (((ItemStack) (Object) this).getNbt() != null && hasSmithedNBT(nbt) && getSmithed(nbt).get("identifier") != null)
+            list.add((E)Text.literal(getSmithed(nbt).getString("identifier")).formatted(Formatting.DARK_GRAY));
+        else
+            list.add(element);
+
+        return true;
     }
 }
