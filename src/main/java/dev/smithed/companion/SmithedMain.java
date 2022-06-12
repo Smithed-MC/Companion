@@ -1,6 +1,5 @@
 package dev.smithed.companion;
 
-import com.google.gson.Gson;
 import dev.smithed.companion.packets.PacketUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -23,22 +22,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SmithedMain implements ModInitializer {
-
 	public static Logger logger = LogManager.getLogger("Smithed");
 	public static String MODID = "smithed";
-	public static Gson gson = new Gson();
 	private static MinecraftServer server;
 
 	// This is used by the clients to hold a reference of registered item groups
 	public static Map<String, ItemGroup> registeredItemGroups = new HashMap<>();
 
 	// The global datapacks file loc
-	public static File SmithedDataPacks = (Path.of(FabricLoader.getInstance().getGameDir().toString() + "/datapacks")).toFile();
+	public static File smithedDataPacks = (Path.of(FabricLoader.getInstance().getGameDir().toString() + "/datapacks")).toFile();
 
 	@Override
 	public void onInitialize() {
-		ServerLifecycleEvents.SERVER_STARTING.register(SmithedMain::setServer);
-		ServerLifecycleEvents.SERVER_STOPPED.register(SmithedMain::clearServer);
+		ServerLifecycleEvents.SERVER_STARTING.register((server) -> SmithedMain.server = server);
+		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> SmithedMain.server = null);
 
 		PacketUtils.registerServerPacketListeners();
 
@@ -52,10 +49,11 @@ public class SmithedMain implements ModInitializer {
 			PacketUtils.SP2S(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), PacketByteBufs.create());
 		});
 
-		registerSmithedReloadListeners();
+		//register smithed reload listeners
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PostReloadListener());
+
 		logger.info("Initialized");
 	}
-
 
 	// why didn't i put these in the smithed util class? idk bcuz fuck you?
 	@NotNull
@@ -65,17 +63,4 @@ public class SmithedMain implements ModInitializer {
 		}
 		throw new UnsupportedOperationException("Accessed server too early!");
 	}
-
-	public static void setServer(MinecraftServer server) {
-		SmithedMain.server = server;
-	}
-
-	public static void clearServer(MinecraftServer server) {
-		SmithedMain.server = null;
-	}
-
-	public void registerSmithedReloadListeners() {
-		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PostReloadListener());
-	}
-
 }

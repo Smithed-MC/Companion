@@ -26,12 +26,11 @@ public abstract class ForgetCompletedPointOfInterestTaskMixin {
         // plus it all gets crunched on runtime
 
         GlobalPos globalPos = entity.getBrain().getOptionalMemory(this.memoryModule).get();
-        world.getBlockState(globalPos.getPos());
 
         // Check for barrel
-        if(world.getBlockState(globalPos.getPos()) == Blocks.BARREL.getDefaultState()) {
+        if (world.getBlockState(globalPos.getPos()) == Blocks.BARREL.getDefaultState()) {
             // check if barrel contains barrel block entity
-            if(world.getBlockEntity(globalPos.getPos()) instanceof BarrelBlockEntity) {
+            if (world.getBlockEntity(globalPos.getPos()) instanceof BarrelBlockEntity) {
                 // check for name :)
                 if (((BarrelBlockEntity) Objects.requireNonNull(world.getBlockEntity(globalPos.getPos()))).getName().getString().startsWith("§f")) {
                     cir.setReturnValue(false);
