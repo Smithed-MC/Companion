@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 
 public class SmithedMainClient implements ClientModInitializer {
 
-    @Override
-    public void onInitializeClient() {
+	@Override
+	public void onInitializeClient() {
 //
 //        PacketUtils.registerClientPacketListeners();
 //
@@ -29,6 +29,6 @@ public class SmithedMainClient implements ClientModInitializer {
 //        catch (NullPointerException e) {
 //            SmithedMain.logger.info("Unable to load client reload command");
 //        }
-    }
+	}
 
 }

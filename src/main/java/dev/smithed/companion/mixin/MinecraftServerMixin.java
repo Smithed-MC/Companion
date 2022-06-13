@@ -20,26 +20,17 @@ import static dev.smithed.companion.SmithedMain.*;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
-
-    @Shadow public abstract LootManager getLootManager();
-    @Shadow public abstract ServerWorld getOverworld();
-    @Inject(method = "loadDataPacks", at= @At("HEAD"))
+    @Inject(method = "loadDataPacks", at = @At("HEAD"))
     private static void injectLoadDatapacks(ResourcePackManager resourcePackManager, DataPackSettings dataPackSettings, boolean safeMode, CallbackInfoReturnable<DataPackSettings> cir) {
-
-
         if (safeMode) return; // exit if in safemode
-        // New provider for the Smithed directory
-        SmithedDataPackProvider smProvider = new SmithedDataPackProvider(SmithedDataPacks); // fetch providers
-        resourcePackManager.providers = new HashSet<>(resourcePackManager.providers); // set providers to existing providers
 
         // Check if provider exists or not if Yes: Discard, if No: continue
         for (ResourcePackProvider provider : resourcePackManager.providers) {
-            if (provider instanceof FileResourcePackProvider && ((FileResourcePackProvider) provider).packsFolder.getAbsolutePath().equals(SmithedDataPacks.getAbsolutePath())) {
+            if (provider instanceof FileResourcePackProvider && ((FileResourcePackProvider) provider).packsFolder.getAbsolutePath().equals(smithedDataPacks.getAbsolutePath())) {
                 return; // exit because custom provider already exists within context
             }
         }
-        // Add and enable provider
-        resourcePackManager.providers.add(smProvider);
-    }
 
+        resourcePackManager.providers.add(new SmithedDataPackProvider(smithedDataPacks));
+    }
 }

@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "smithed",
   "version": "${version}",
-
   "name": "Smithed Companion",
   "description": "This is the companion mod for smithed, DO NOT DISABLE",
   "authors": [
@@ -13,11 +12,9 @@
     "homepage": "https://smithed.dev/",
     "sources": "https://github.com/Smithed-MC/smithed-companion/tree/main"
   },
-
   "accessWidener": "smithed.accesswidener",
   "license": "CC0-1.0",
   "icon": "assets/smithed/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -30,14 +27,10 @@
   "mixins": [
     "smithed.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
     "minecraft": "1.19.x",
     "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }

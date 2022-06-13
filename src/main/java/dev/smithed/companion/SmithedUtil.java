@@ -9,13 +9,16 @@ public class SmithedUtil {
     public static boolean hasNBT(ItemStack stack, String key) {
         return stack.getSubNbt(key) != null;
     }
+
     // Takes only NBT instead of an entire Item
     public static boolean hasNBT(NbtCompound nbtCompound, String key) {
         return nbtCompound.getCompound(key) != null;
     }
+
     public static boolean hasSmithedNBT(ItemStack stack) {
         return hasNBT(stack, "smithed");
     }
+
     public static boolean hasSmithedNBT(NbtCompound nbtCompound) {
         return hasNBT(nbtCompound, "smithed");
     }

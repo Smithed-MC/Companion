@@ -1,70 +1,59 @@
 package dev.smithed.companion;
 
-import com.google.gson.Gson;
-import dev.smithed.companion.events.EventUtils;
-import dev.smithed.companion.item_groups.ItemGroupData;
-import dev.smithed.companion.item_groups.SimplifiedItemGroupEntry;
 import dev.smithed.companion.packets.PacketUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.ModInitializer;
-// getString(ctx, "string")
-import java.io.File;
-import java.nio.file.Path;
-import java.util.*;
-
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.entity.EnchantingTableBlockEntity;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.HuskEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-// word()
-// literal("foo")
-// argument("bar", word())
-// Import everything
-
+import java.io.File;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SmithedMain implements ModInitializer {
-
 	public static Logger logger = LogManager.getLogger("Smithed");
 	public static String MODID = "smithed";
-	public static Gson gson = new Gson();
 	private static MinecraftServer server;
 
 	// This is used by the clients to hold a reference of registered item groups
 	public static Map<String, ItemGroup> registeredItemGroups = new HashMap<>();
 
 	// The global datapacks file loc
-	@Environment(EnvType.CLIENT)
-	public static File SmithedDataPacks = (Path.of(FabricLoader.getInstance().getGameDir().toString() + "/datapacks")).toFile();
-
+	public static File smithedDataPacks = (Path.of(FabricLoader.getInstance().getGameDir().toString() + "/datapacks")).toFile();
 
 	@Override
 	public void onInitialize() {
-
-		ServerLifecycleEvents.SERVER_STARTING.register(SmithedMain::setServer);
-		ServerLifecycleEvents.SERVER_STOPPED.register(SmithedMain::clearServer);
+		ServerLifecycleEvents.SERVER_STARTING.register((server) -> SmithedMain.server = server);
+		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> SmithedMain.server = null);
 
 		PacketUtils.registerServerPacketListeners();
-		EventUtils.RegisterEvents();
 
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			handler.getPlayer().getScoreboardTags().remove("smithed.client");
+			SmithedMain.logger.info("removed tag: smithed.client");
+		});
 
-		registerSmithedReloadListeners();
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+			PacketUtils.SP2S(new Identifier(SmithedMain.MODID, "mark_companion_player"), PacketByteBufs.create());
+			PacketUtils.SP2S(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), PacketByteBufs.create());
+		});
+
+		//register smithed reload listeners
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PostReloadListener());
+
 		logger.info("Initialized");
 	}
-
 
 	// why didn't i put these in the smithed util class? idk bcuz fuck you?
 	@NotNull
@@ -74,17 +63,4 @@ public class SmithedMain implements ModInitializer {
 		}
 		throw new UnsupportedOperationException("Accessed server too early!");
 	}
-
-	public static void setServer(MinecraftServer server) {
-		SmithedMain.server = server;
-	}
-
-	public static void clearServer(MinecraftServer server) {
-		SmithedMain.server = null;
-	}
-
-	public void registerSmithedReloadListeners() {
-		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PostReloadListener());
-	}
-
 }
