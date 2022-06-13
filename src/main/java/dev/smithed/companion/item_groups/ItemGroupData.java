@@ -138,7 +138,6 @@ public class ItemGroupData {
                 ));
 
             } else if (simplifiedGroup.getOperation().equals("smithed:append")) {
-
                 queue.addAll(Arrays.stream(simplifiedGroup.getEntries()).toList());
             }
 
@@ -156,20 +155,22 @@ public class ItemGroupData {
         if(entry.getNbt() != null) try {
             stack.setNbt(StringNbtReader.parse(entry.getNbt()));
         } catch (CommandSyntaxException e) {
-            // could i have done this differently? yes. will i? no
-            SmithedMain.logger.error(errMsg + " of item: " + stack + ", with NBT: " + entry.getNbt() + ", could not be parsed due to NBT Exception");
+            // could i have done this differently? yes. will I? no
+            SmithedMain.logger.error("{} of item: {}, with NBT: {}, could not be parsed due to NBT Exception", errMsg, stack, entry.getNbt());
         }
         return stack;
     }
 
-    public static void addItemsToVanillaItemGroup(String name, DefaultedList<ItemStack> stacks) {
+    public static void addItemsToVanillaItemGroup(DefaultedList<ItemStack> stacks, String name) {
         for (ItemGroup itemGroup : ItemGroup.GROUPS) {
-            if(BLACKLIST.contains(name)) {
+            // if an itemgroup is within the blacklist it should be ignored.
+            if(BLACKLIST.contains(itemGroup.getName())) {
                 SmithedMain.logger.error("This group {} cannot be found or is blacklisted for addition!", itemGroup.getName());
                 break;
             }
-            itemGroup.appendStacks(stacks);
-
+            else if(itemGroup.getName().equalsIgnoreCase(name))
+                itemGroup.appendStacks(stacks);
+            break;
         }
     }
 }

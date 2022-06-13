@@ -1,9 +1,14 @@
 package dev.smithed.companion;
 
 import com.google.gson.JsonSyntaxException;
+import dev.smithed.companion.commands.ShortcutCommand;
 import dev.smithed.companion.item_groups.ItemGroupData;
 import dev.smithed.companion.item_groups.SimplifiedItemGroupEntry;
+import dev.smithed.companion.mixin.TitleScreenMixin;
+import dev.smithed.companion.packets.PacketUtils;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootManager;
 import net.minecraft.loot.LootTable;
