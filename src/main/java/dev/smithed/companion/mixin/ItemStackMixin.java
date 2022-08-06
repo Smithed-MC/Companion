@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
+import static dev.smithed.companion.SmithedMain.logger;
 import static dev.smithed.companion.SmithedUtil.getSmithed;
 import static dev.smithed.companion.SmithedUtil.hasSmithedNBT;
 
@@ -22,12 +23,35 @@ import static dev.smithed.companion.SmithedUtil.hasSmithedNBT;
 public abstract class ItemStackMixin {
     @Shadow private NbtCompound nbt;
 
+    @Shadow public abstract int getDamage();
+
+    @Shadow public abstract int getMaxDamage();
+
+    // used to make sure we don't calculate a color more than once, feel free to replace with something better
+    // if possible - dragon
+
     @Inject(method = "getItemBarColor", at = @At("RETURN"), cancellable = true)
     public void itemBarColorInject(CallbackInfoReturnable<Integer> cir) {
         NbtList colorList = nbt.getCompound("smithed").getCompound("durability").getList("colors", NbtElement.INT_TYPE);
         if(hasSmithedNBT(nbt) && colorList != null && colorList.size() > 0) {
-            // yes there was other code here but it didn't do anything because it was incomplete so i cut it out.
-            cir.setReturnValue(colorList.getInt(0));
+            int itemBarColor = colorList.getInt(0);
+            if(colorList.size() > 1) {
+                // split into sections and then find which section this bar is currently in
+                // this can be calculated with this
+                int trueDamage = this.getDamage();
+                int curSection = (trueDamage / (this.getMaxDamage() / colorList.size()));
+                float lerpScale = (float) ((trueDamage / (this.getMaxDamage() / colorList.size())) - (curSection > 1 ? curSection : 0));
+
+                //logger.info(curSection);
+                //logger.info(lerpScale);
+
+                int colorA = colorList.getInt(curSection), colorB = colorList.getInt(curSection + 1);
+                int bitShiftA = (int)(256 * lerpScale),bitShiftB = 256 - bitShiftA;
+
+                // final bar color after being bitshifted
+                itemBarColor = (((((colorA & 0x00ff00ff) * bitShiftB) + ((colorB & 0x00ff00ff) * bitShiftA)) >> 8) & 0x00ff00ff) | (((((colorA & 0xff00ff00) * bitShiftB) + ((colorB & 0xff00ff00) * bitShiftA)) >> 8) & 0xff00ff00);
+            }
+            cir.setReturnValue(itemBarColor);
         }
     }
 

@@ -3,6 +3,8 @@ package dev.smithed.companion;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
+import static dev.smithed.companion.SmithedMain.logger;
+
 public class SmithedUtil {
 
     // just didn't wanna type these out every time
@@ -25,5 +27,9 @@ public class SmithedUtil {
 
     public static NbtCompound getSmithed(NbtCompound nbtCompound) {
         return nbtCompound.getCompound("smithed");
+    }
+
+    public static void LOG(String info) {
+        logger.info(info);
     }
 }

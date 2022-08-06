@@ -1,20 +1,22 @@
 package dev.smithed.companion.packets;
 
-import dev.smithed.companion.PostReloadListener;
 import dev.smithed.companion.SmithedMain;
-import dev.smithed.companion.item_groups.ItemGroupData;
+import dev.smithed.companion.item_groups.ItemGroupUtils;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.render.entity.DragonFireballEntityRenderer;
+import net.minecraft.client.render.entity.ProjectileEntityRenderer;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.DefaultedList;
 
 import java.util.Map;
 import java.util.Objects;
+
+import static dev.smithed.companion.SmithedMain.logger;
 
 public class PacketUtils {
     // everything within this map will be registered as a packet listener on the server side
@@ -22,37 +24,36 @@ public class PacketUtils {
     public static Map<Identifier, ServerPlayNetworking.PlayChannelHandler> serverPacketMap = Map.ofEntries(
             // processes and sends itemgroup info.
             Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), (server, player, handler, buf, responseSender) -> {
-                for (ItemGroupData data : PostReloadListener.unregisteredItemGroups.values()) {
+                if(ItemGroupUtils.groupEntries != null) {
+
                     PacketByteBuf groupBuffer = PacketByteBufs.create();
-                    NbtCompound group = new NbtCompound();
-                    data.toNbt(group);
-                    groupBuffer.writeNbt(group);
-                    SP2C(player, new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), groupBuffer);
+                    ItemGroupUtils.parseEntries(server);
+                    ItemGroupUtils.packItemGroups();
+
+                    logger.info("packed groups: {}",ItemGroupUtils.itemGroups);
+
+                    for (NbtCompound data : ItemGroupUtils.itemGroups) {
+                        logger.info(data);
+                        groupBuffer.writeNbt(data);
+                        SP2C(player, new Identifier(SmithedMain.MODID, "itemgroup_data_channel"), groupBuffer);
+                    }
                 }
             }),
-            // mark down player as smithed-comp-client user. marker is removed upon logout.
-            // might eventually add more subtags for enabled feature checks however idk rn.
+
+            // Mark down player as smithed-comp-client user. marker is removed upon logout.
+            // Might eventually add more subtags for enabled feature checks however idk rn.
             Map.entry(new Identifier(SmithedMain.MODID, "mark_companion_player"), (server, player, handler, buf, responseSender) -> {
                 player.addScoreboardTag("smithed.client");
-                SmithedMain.logger.info("marked down: " + player.getName() + " as a smithed-companion user");
+                logger.info("marked down: " + player.getName().getString() + " as a smithed-companion user");
             })
     );
 
     // everything within this map will be registered as a packet listener on the client side
     public static Map<Identifier, ClientPlayNetworking.PlayChannelHandler> clientPacketMap = Map.ofEntries(
             // decodes itemgroup info
-            Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_info_channel"), (client, handler, buf, responseSender) -> {
-
-                ItemGroupData itemGroupData = ItemGroupData.fromNBT(Objects.requireNonNull(buf.readUnlimitedNbt()));
-                // NOT the best way to do this
-                // but screw you, Quick and dirty
-                DefaultedList<ItemStack> stacks = DefaultedList.of();
-                if(!SmithedMain.registeredItemGroups.containsKey(itemGroupData.getName()))
-                    SmithedMain.registeredItemGroups.put(itemGroupData.getName(), itemGroupData.toItemGroup());
-                else {
-                    stacks.addAll(itemGroupData.getItemStacks());
-                    SmithedMain.registeredItemGroups.get(itemGroupData.getName()).appendStacks(stacks);
-                }
+            Map.entry(new Identifier(SmithedMain.MODID, "itemgroup_data_channel"), (client, handler, buf, responseSender) -> {
+                ItemGroupUtils.destroyGroups();
+                ItemGroupUtils.buildGroup(Objects.requireNonNull(buf.readUnlimitedNbt()));
             })
     );
 
