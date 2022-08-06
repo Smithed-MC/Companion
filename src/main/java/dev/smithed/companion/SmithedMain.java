@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.item.GoatHornItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -38,7 +39,6 @@ public class SmithedMain implements ModInitializer {
 	public void onInitialize() {
 
 		// Load in file containing hashcodes
-
 		File smithedConfig = (Path.of(FabricLoader.getInstance().getConfigDir().toFile() + "/datapacks")).toFile();
 
 		ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
@@ -52,7 +52,6 @@ public class SmithedMain implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> SmithedMain.server = null);
 
 		DefaultedList<ItemStack> stacks = DefaultedList.of();
-		stacks.add(new ItemStack(Items.COMMAND_BLOCK).setCustomName(Text.literal("fucky wucky OWO")));
 		ItemGroup.BUILDING_BLOCKS.appendStacks(stacks);
 
 		//register smithed reload listeners
