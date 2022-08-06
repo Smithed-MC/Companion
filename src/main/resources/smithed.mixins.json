@@ -4,7 +4,6 @@
   "package": "dev.smithed.companion.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "JachroMixin",
     "MinecraftServerMixin",
     "ResourcePackManagerMixin",
     "SmithedItemGroupMixin",
