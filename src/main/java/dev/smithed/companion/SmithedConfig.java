@@ -1,14 +1,12 @@
 package dev.smithed.companion;
 
-import java.util.Map;
-
 public class SmithedConfig {
     private CachedHash[] cachedHashs;
 
     public CachedHash[] getCachedHashs() { return cachedHashs; }
     public void setCachedHashs(CachedHash[] value) { this.cachedHashs = value; }
 
-    public class CachedHash {
+    public static class CachedHash {
         private String id;
         private long hash;
 

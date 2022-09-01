@@ -1,7 +1,5 @@
 package dev.smithed.companion.item_groups;
 
-import com.google.gson.annotations.Expose;
-
 import java.util.Arrays;
 
 public class SimplifiedItemGroup {

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dev.smithed.companion.item_groups.ItemGroupUtils;
 import dev.smithed.companion.item_groups.SimplifiedItemGroup;
-import dev.smithed.companion.item_groups.SimplifiedItemGroupEntry;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
@@ -14,11 +13,14 @@ import net.minecraft.util.profiler.Profiler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static dev.smithed.companion.SmithedMain.*;
+import static dev.smithed.companion.SmithedMain.logger;
 
 public class PostReloadListener implements SimpleResourceReloadListener<Void> {
 

@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-import static dev.smithed.companion.SmithedMain.logger;
 import static dev.smithed.companion.SmithedUtil.getSmithed;
 import static dev.smithed.companion.SmithedUtil.hasSmithedNBT;
 

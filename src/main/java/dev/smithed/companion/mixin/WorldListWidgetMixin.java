@@ -1,7 +1,6 @@
 package dev.smithed.companion.mixin;
 
 import net.minecraft.client.gui.screen.world.WorldListWidget;
-import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

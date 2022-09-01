@@ -2,31 +2,25 @@ package dev.smithed.companion.item_groups;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.smithed.companion.SmithedItemGroupExtensions;
-import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
-import net.fabricmc.fabric.api.item.v1.FabricItem;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.fabricmc.fabric.impl.item.group.ItemGroupExtensions;
-import net.minecraft.client.render.entity.model.BookModel;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextType;
-import net.minecraft.nbt.*;
-import net.minecraft.resource.ResourceManager;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 import static dev.smithed.companion.SmithedMain.logger;
-import static dev.smithed.companion.SmithedUtil.LOG;
 
 public class ItemGroupUtils {
 
