@@ -4,7 +4,11 @@
     "id" : "minecraft:stone",
     "Count" : 1
   },
-  "display_name" : "{\"text\":\"This house is bitching\"}",
+  "display_name" : {
+    "text" : "foobar",
+    "color" : "white"
+  },
+  "texture" :  "",
   "entries" : [
     {
       "type" : "smithed:item_entry",

@@ -28,18 +28,21 @@ public class ItemGroupUtils {
         private Identifier identifier;
         private ItemStack icon;
         private Text display_name;
+        private String texture;
         private List<Entry> entries;
 
-        public ItemGroupData(Identifier identifier, ItemStack icon, Text display_name, List<Entry> entries) {
+        public ItemGroupData(Identifier identifier, ItemStack icon, Text display_name, String texture, List<Entry> entries) {
             this.identifier = identifier;
             this.icon = icon;
             this.display_name = display_name;
+            this.texture = texture;
             this.entries = entries;
         }
 
         public Identifier getIdentifier() { return this.identifier; }
         public ItemStack getIcon() { return this.icon; }
         public Text getDisplayName() { return this.display_name; }
+        public String getTexture() { return this.texture; }
         public List<Entry> getEntries() { return this.entries; }
 
         /*
@@ -50,6 +53,7 @@ public class ItemGroupUtils {
                     Identifier.CODEC.fieldOf("identifier").forGetter(ItemGroupData::getIdentifier),
                     ItemStack.CODEC.fieldOf("icon").forGetter(ItemGroupData::getIcon),
                     Codecs.TEXT.fieldOf("display_name").forGetter(ItemGroupData::getDisplayName),
+                    Codecs.NON_EMPTY_STRING.optionalFieldOf("texture","").forGetter(ItemGroupData::getTexture),
                     ENTRY_CODEC.listOf().fieldOf("entries").forGetter(ItemGroupData::getEntries)
             ).apply(instance, ItemGroupData::new)
         );
