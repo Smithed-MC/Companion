@@ -41,6 +41,7 @@ public class ItemGroupHandler {
                 var Itemgroup = FabricItemGroup.builder()
                         .displayName(itemGroupData.getDisplayName())
                         .icon(itemGroupData::getIcon)
+                        .texture(itemGroupData.getTexture())
                         .entries((displayContext, entries) -> {
                             itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection()));
                         })
@@ -65,6 +66,7 @@ public class ItemGroupHandler {
         RegistryUtils.thawRegistry(Registries.ITEM_GROUP);
         registeredItemGroups.forEach(itemgroup -> {
             RegistryUtils.removeRegistryEntry(Registries.ITEM_GROUP, itemgroup);
+            registeredItemGroups.remove(itemgroup);
         });
         Registries.ITEM_GROUP.freeze();
         ItemGroups.collect();

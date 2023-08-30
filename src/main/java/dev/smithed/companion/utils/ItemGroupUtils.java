@@ -53,7 +53,7 @@ public class ItemGroupUtils {
                     Identifier.CODEC.fieldOf("identifier").forGetter(ItemGroupData::getIdentifier),
                     ItemStack.CODEC.fieldOf("icon").forGetter(ItemGroupData::getIcon),
                     Codecs.TEXT.fieldOf("display_name").forGetter(ItemGroupData::getDisplayName),
-                    Codecs.NON_EMPTY_STRING.optionalFieldOf("texture","").forGetter(ItemGroupData::getTexture),
+                    Codecs.NON_EMPTY_STRING.optionalFieldOf("texture","items.png").forGetter(ItemGroupData::getTexture),
                     ENTRY_CODEC.listOf().fieldOf("entries").forGetter(ItemGroupData::getEntries)
             ).apply(instance, ItemGroupData::new)
         );
