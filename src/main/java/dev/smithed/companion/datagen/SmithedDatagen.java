@@ -1,6 +1,5 @@
 package dev.smithed.companion.datagen;
 
-import com.mojang.serialization.Lifecycle;
 import dev.smithed.companion.utils.RegistryUtils;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;

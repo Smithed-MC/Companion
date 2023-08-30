@@ -1,13 +1,10 @@
 package dev.smithed.companion.utils;
 
-import com.google.common.base.Stopwatch;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.smithed.companion.SmithedMain;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.function.CommandFunction;
 import net.minecraft.server.function.CommandFunctionManager;
@@ -15,7 +12,6 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 
 import java.util.Optional;
-import java.util.Timer;
 
 import static net.minecraft.server.command.CommandManager.literal;
 

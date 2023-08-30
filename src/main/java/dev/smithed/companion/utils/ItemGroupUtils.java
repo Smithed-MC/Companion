@@ -1,27 +1,15 @@
 package dev.smithed.companion.utils;
 
-import com.ibm.icu.impl.CollectionSet;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import static dev.smithed.companion.SmithedMain.modID;
 import static dev.smithed.companion.utils.RegistryUtils.ENTRY_TYPE_REGISTRY;
 
 public class ItemGroupUtils {

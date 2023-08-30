@@ -1,6 +1,5 @@
 package dev.smithed.companion.utils;
 
-import dev.smithed.companion.SmithedMain;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resource.FileResourcePackProvider;
 import net.minecraft.resource.ResourcePackProfile;

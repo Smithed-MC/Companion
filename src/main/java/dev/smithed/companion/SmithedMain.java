@@ -3,10 +3,6 @@ package dev.smithed.companion;
 import dev.smithed.companion.utils.RegistryUtils;
 import dev.smithed.companion.utils.ServerEventUtils;
 import net.fabricmc.api.ModInitializer;
-
-import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

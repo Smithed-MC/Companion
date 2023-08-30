@@ -2,7 +2,6 @@ package dev.smithed.companion.datagen;
 
 import dev.smithed.companion.utils.ItemGroupUtils;
 import dev.smithed.companion.utils.RegistryUtils;
-import dev.smithed.companion.utils.ShortcutUtils;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
 import net.minecraft.item.ItemStack;
