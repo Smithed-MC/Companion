@@ -1,0 +1,17 @@
+{
+  "identifier" : "smithed:test",
+  "icon" : {
+    "id" : "minecraft:stone",
+    "Count" : 1
+  },
+  "display_name" : "{\"text\":\"This house is bitching\"}",
+  "entries" : [
+    {
+      "type" : "smithed:item_entry",
+      "item" : {
+        "id" : "minecraft:stone",
+        "Count" : 1
+      }
+    }
+  ]
+}

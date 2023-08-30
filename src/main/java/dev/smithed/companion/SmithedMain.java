@@ -1,63 +1,38 @@
 package dev.smithed.companion;
 
-import dev.smithed.companion.packets.PacketUtils;
+import dev.smithed.companion.utils.RegistryUtils;
+import dev.smithed.companion.utils.ServerEventUtils;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.collection.DefaultedList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.nio.file.Path;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SmithedMain implements ModInitializer {
-	public static Logger logger = LogManager.getLogger("Smithed");
-	public static String MODID = "smithed";
-	private static MinecraftServer server;
-	// The global datapacks file loc
-	public static File smithedDataPacks = (Path.of(FabricLoader.getInstance().getGameDir().toString() + "/datapacks")).toFile();
-	public static SmithedConfig config;
+	public static final String MODID = "smithed";
+    private static final Logger LOGGER = LoggerFactory.getLogger("smithed-companion");
 
 	@Override
 	public void onInitialize() {
+		LOGGER.info("Smithed companion mod has started!");
 
-		// Load in file containing hashcodes
-		File smithedConfig = (Path.of(FabricLoader.getInstance().getConfigDir().toFile() + "/datapacks")).toFile();
-
-		//ServerLifecycleEvents.SERVER_STARTING.register((server) -> {SmithedMain.server = server;});
-		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> SmithedMain.server = null);
-
-		DefaultedList<ItemStack> stacks = DefaultedList.of();
-		ItemGroup.BUILDING_BLOCKS.appendStacks(stacks);
-
-		//register smithed reload listeners
-		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PostReloadListener());
-
-		PacketUtils.registerServerPacketListeners();
-
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			handler.getPlayer().getScoreboardTags().remove("smithed.client");
-			logger.info("removed tag: smithed.client");
-		});
-
-
-		logger.info("Initialized");
+		RegistryUtils.registerAll();
+		ServerEventUtils.registerAll();
 	}
 
-	// why didn't i put these in the smithed util class? idk bcuz fuck you?
-	@NotNull
-	public static MinecraftServer getServer() {
-		if (server != null) {
-			return server;
-		}
-		throw new UnsupportedOperationException("Accessed server too early!");
+	/*
+	Creates a Logger for the given name. Exists to split off different utilities into their own thing.
+	 */
+	public static Logger createLogger(String logger) {
+		return LoggerFactory.getLogger(MODID + "-" + logger);
+	}
+	/*
+	Returns a Smithed Identifier, merely a shortcut for things requiring it.
+	 */
+	public static Identifier modID(String path) {
+		return new Identifier(MODID, path);
 	}
 }

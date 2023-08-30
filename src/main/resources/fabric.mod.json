@@ -1,36 +1,47 @@
 {
-  "schemaVersion": 1,
-  "id": "smithed",
-  "version": "${version}",
-  "name": "Smithed Companion",
-  "description": "This is the companion mod for smithed, DO NOT DISABLE",
-  "authors": [
-    "dragoncommands (Mod developer)",
-    "TheNuclearNexus (Web app developer)"
-  ],
-  "contact": {
-    "homepage": "https://smithed.dev/",
-    "sources": "https://github.com/Smithed-MC/smithed-companion/tree/main"
-  },
-  "accessWidener": "smithed.accesswidener",
-  "license": "CC0-1.0",
-  "icon": "assets/smithed/icon.png",
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "dev.smithed.companion.SmithedMain"
-    ],
-    "client": [
-      "dev.smithed.companion.SmithedMainClient"
-    ]
-  },
-  "mixins": [
-    "smithed.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.11.3",
-    "fabric": "*",
-    "minecraft": "1.19.x",
-    "java": ">=17"
-  }
+	"schemaVersion": 1,
+	"id": "smithed",
+	"version": "${version}",
+	"name": "Smithed Companion",
+	"description": "This is the companion mod for smithed, DO NOT DISABLE",
+	"authors": [
+		"dragoncommands (Mod developer)",
+		"TheNuclearNexus (Web app developer)",
+		"Pablo (Beta reader)"
+	],
+	"contact": {
+		"homepage": "https://smithed.dev/",
+		"sources": "https://github.com/Smithed-MC/Companion/tree/main"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/smithed-companion/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+          "dev.smithed.companion.SmithedMain"
+		],
+		"client": [
+			"dev.smithed.companion.SmithedModClient"
+		],
+		"fabric-datagen": [
+			"dev.smithed.companion.datagen.SmithedDatagen"
+		]
+	},
+	"mixins": [
+		"smithed-companion.mixins.json",
+		{
+			"config": "smithed-companion.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.14.22",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"accessWidener": "smithed.accesswidener"
 }

@@ -1,0 +1,5 @@
+{
+  "alias": "foo",
+  "function": "smithed:heal",
+  "permission_level": 0
+}
