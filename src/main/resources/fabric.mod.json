@@ -25,6 +25,9 @@
 		],
 		"fabric-datagen": [
 			"dev.smithed.companion.datagen.SmithedDatagen"
+		],
+		"jei_mod_plugin": [
+			"dev.smithed.companion.integrations.jei.JeiPlugin"
 		]
 	},
 	"mixins": [
