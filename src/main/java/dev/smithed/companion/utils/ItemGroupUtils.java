@@ -3,9 +3,11 @@ package dev.smithed.companion.utils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +43,7 @@ public class ItemGroupUtils {
 
         public Identifier getIdentifier() { return this.identifier; }
         public ItemStack getIcon() { return this.icon; }
-        public Text getDisplayName() { return this.display_name; }
+        public Text getDisplayName() { return this.display_name.copy(); }
         public String getTexture() { return this.texture; }
         public List<Entry> getEntries() { return this.entries; }
 
@@ -68,7 +70,7 @@ public class ItemGroupUtils {
             return null;
         }
 
-        public Collection<ItemStack> getCollection() {
+        public Collection<ItemStack> getCollection(World world) {
             return null;
         }
 
@@ -117,7 +119,7 @@ public class ItemGroupUtils {
             public EntryType getType() { return new EntryType(CODEC); }
 
             @Override
-            public Collection<ItemStack> getCollection() {
+            public Collection<ItemStack> getCollection(World world) {
                 return List.of(item_stack);
             }
 
@@ -132,6 +134,28 @@ public class ItemGroupUtils {
          */
         public static class SortedEntry extends Entry {
 
+        }
+
+        public static class DatapackItemEntry extends Entry {
+            private final Identifier identifier;
+
+            public DatapackItemEntry(Identifier identifier) {this.identifier = identifier; }
+
+            public Identifier getIdentifier() { return identifier; }
+
+            @Override
+            public EntryType getType() {
+                return new EntryType(CODEC);
+            }
+
+            public static final Codec<DatapackItemEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    Identifier.CODEC.fieldOf("id").forGetter(DatapackItemEntry::getIdentifier)
+            ).apply(instance, DatapackItemEntry::new));
+
+            @Override
+            public Collection<ItemStack> getCollection(World world) {
+                return List.of(((DatapackItemUtils.DatapackItemHandler)world).getDatapackItem(identifier));
+            }
         }
 
         public static class EntryType {

@@ -16,6 +16,10 @@
         "id" : "minecraft:stone",
         "Count" : 1
       }
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:toast"
     }
   ]
 }
