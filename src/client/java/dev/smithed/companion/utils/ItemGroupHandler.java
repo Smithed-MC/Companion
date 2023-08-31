@@ -67,10 +67,8 @@ public class ItemGroupHandler {
      */
     public static void discardGroups(ClientPlayNetworkHandler networkHandler, MinecraftClient client) {
         RegistryUtils.thawRegistry(Registries.ITEM_GROUP);
-        registeredItemGroups.forEach(itemgroup -> {
-            RegistryUtils.removeRegistryEntry(Registries.ITEM_GROUP, itemgroup);
-            registeredItemGroups.remove(itemgroup);
-        });
+        registeredItemGroups.forEach(itemgroup -> RegistryUtils.removeRegistryEntry(Registries.ITEM_GROUP, itemgroup));
+        registeredItemGroups.clear();
         Registries.ITEM_GROUP.freeze();
         ItemGroups.collect();
     }
