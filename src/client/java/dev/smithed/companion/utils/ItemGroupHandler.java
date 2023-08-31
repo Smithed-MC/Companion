@@ -2,10 +2,13 @@ package dev.smithed.companion.utils;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.impl.client.itemgroup.CreativeGuiExtensions;
+import net.fabricmc.fabric.mixin.itemgroup.ItemGroupsMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -43,7 +46,7 @@ public class ItemGroupHandler {
                         .icon(itemGroupData::getIcon)
                         .texture(itemGroupData.getTexture())
                         .entries((displayContext, entries) -> {
-                            itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection()));
+                            itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection(client.world)));
                         })
                         .build();
                 Registry.register(Registries.ITEM_GROUP, itemGroupData.getIdentifier(), Itemgroup);

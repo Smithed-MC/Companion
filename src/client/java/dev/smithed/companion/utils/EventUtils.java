@@ -24,6 +24,7 @@ public class EventUtils {
     Essentially a central dispatch point for numerous other classes
      */
     private static void joinListener(ClientPlayNetworkHandler networkHandler, PacketSender packetSender, MinecraftClient client) {
+        DatapackItemHandler.loadDatapackItems(networkHandler, packetSender, client);
         ItemGroupHandler.loadGroups(networkHandler,packetSender,client);
     }
 
