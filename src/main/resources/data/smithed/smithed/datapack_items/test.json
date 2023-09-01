@@ -2,6 +2,11 @@
   "id" : "smithed:toast",
   "item" : {
     "id" : "minecraft:tnt",
-    "Count" : 1
+    "Count" : 1,
+    "tag": {
+      "display": {
+        "Name": "{\"text\":\"Super TNT\",\"color\":\"white\",\"italic\":false}"
+      }
+    }
   }
 }

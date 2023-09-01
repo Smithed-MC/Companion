@@ -29,10 +29,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @mezz.jei.api.JeiPlugin
 public class JeiPlugin implements IModPlugin {
@@ -46,20 +43,24 @@ public class JeiPlugin implements IModPlugin {
     }
 
     public static final RecipeType<CraftingRecipe> HEAVYWORKBENCH = RecipeType.create(SmithedMain.MODID, "heavy_workbench", CraftingRecipe.class);
+    private static final Map<Item,AllNbtSubtype> SUBTYPES = new HashMap<>();
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
+        SUBTYPES.clear();
+
         final ClientWorld world = MinecraftClient.getInstance().world;
-        final Set<Item> added = new HashSet<>();
         if(world != null) {
             Registry<DatapackItemUtils.DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
             registry.forEach(datapackItem -> {
-                final Item item = datapackItem.getStack().getItem();
-                if(!added.contains(item)) {
-                    registration.registerSubtypeInterpreter(item, new AllNbtSubtype(datapackItem.getIdentifier().toString()));
-                    added.add(item);
-                }
+                final ItemStack item = datapackItem.getStack();
+                SUBTYPES.putIfAbsent(item.getItem(), new AllNbtSubtype());
+                SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), datapackItem.getIdentifier().toString());
             });
+            for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+                registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
+            }
         }
     }
 
