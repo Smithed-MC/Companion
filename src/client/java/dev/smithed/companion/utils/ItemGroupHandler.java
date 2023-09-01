@@ -1,5 +1,6 @@
 package dev.smithed.companion.utils;
 
+import dev.smithed.companion.SmithedMain;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.impl.client.itemgroup.CreativeGuiExtensions;
@@ -49,8 +50,8 @@ public class ItemGroupHandler {
                             itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection(client.world)));
                         })
                         .build();
-                Registry.register(Registries.ITEM_GROUP, itemGroupData.getIdentifier(), Itemgroup);
-                registeredItemGroups.add(RegistryKey.of(RegistryKeys.ITEM_GROUP, itemGroupData.getIdentifier()));
+                Registry.register(Registries.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData).toString(), Itemgroup);
+                registeredItemGroups.add(RegistryKey.of(RegistryKeys.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData)));
             });
 
             Registries.ITEM_GROUP.freeze();

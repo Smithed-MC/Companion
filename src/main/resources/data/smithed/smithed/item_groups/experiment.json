@@ -1,5 +1,4 @@
 {
-  "identifier" : "smithed:test",
   "icon" : {
     "id" : "minecraft:stone",
     "Count" : 1
@@ -19,7 +18,15 @@
     },
     {
       "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:toast"
+      "id" : "smithed:foo"
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:test"
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:test"
     }
   ]
 }
