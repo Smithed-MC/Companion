@@ -1,0 +1,18 @@
+{
+  "pattern": [
+    "#########",
+    "GGGGGGGGG",
+    "#########"
+  ],
+  "key": {
+    "#": {
+      "type" : "smithed:item_entry",
+      "id": "minecraft:sand"
+    },
+    "G": {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:super_gunpowder"
+    }
+  },
+  "category": "smithed:heavy_workbench"
+}

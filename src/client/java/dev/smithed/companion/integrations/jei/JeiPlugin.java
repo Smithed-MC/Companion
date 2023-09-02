@@ -1,12 +1,13 @@
 package dev.smithed.companion.integrations.jei;
 
 import dev.smithed.companion.SmithedMain;
+import dev.smithed.companion.registry.ComRecipe;
 import dev.smithed.companion.utils.DatapackItemUtils;
 import dev.smithed.companion.utils.RegistryUtils;
+import dev.smithed.companion.registry.RecipeCategory;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
-import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
@@ -24,16 +25,18 @@ import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.Registries;
 
 import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 @mezz.jei.api.JeiPlugin
 public class JeiPlugin implements IModPlugin {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("smithed-companion");
     private static final Identifier ID = new Identifier(SmithedMain.MODID, "smithed");
 
     @Override
@@ -42,58 +45,106 @@ public class JeiPlugin implements IModPlugin {
         return ID;
     }
 
-    public static final RecipeType<CraftingRecipe> HEAVYWORKBENCH = RecipeType.create(SmithedMain.MODID, "heavy_workbench", CraftingRecipe.class);
     private static final Map<Item,AllNbtSubtype> SUBTYPES = new HashMap<>();
+    private static final Map<Identifier,RecipeType<CraftingRecipe>> RECIPETYPES = new HashMap<>();
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         SUBTYPES.clear();
 
         final ClientWorld world = MinecraftClient.getInstance().world;
-        if(world != null) {
-            Registry<DatapackItemUtils.DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
-            registry.forEach(datapackItem -> {
-                final ItemStack item = datapackItem.getStack();
-                SUBTYPES.putIfAbsent(item.getItem(), new AllNbtSubtype());
-                SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), datapackItem.getIdentifier().toString());
-            });
-            for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
-                registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
-            }
+        if(world == null)
+            return;
+
+        final Registry<DatapackItemUtils.DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
+        registry.forEach(datapackItem -> {
+            final ItemStack item = datapackItem.itemStack();
+            SUBTYPES.putIfAbsent(item.getItem(), new AllNbtSubtype());
+            SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), datapackItem.identifier().toString());
+        });
+        for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
+            registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
         }
     }
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
-        final IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
-        final Identifier iconLocation = new Identifier(SmithedMain.MODID, "icon.png");
+        final ClientWorld world = MinecraftClient.getInstance().world;
+        if(world == null)
+            return;
 
-        final IRecipeCategory<CraftingRecipe> category = new DynamicCategory<>(
-                HEAVYWORKBENCH,
-                Text.of("Heavy Workbench"),
-                guiHelper.drawableBuilder(iconLocation, 0, 0, 64, 64).addPadding(0, 0, 0, 16).build(),
-                guiHelper.createDrawable(iconLocation, 0, 0, 16, 16)
-        );
-        registration.addRecipeCategories(category);
+        RECIPETYPES.clear();
+        final IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
+
+        final Identifier chestLocation = new Identifier(Identifier.DEFAULT_NAMESPACE, "textures/gui/container/shulker_box.png");
+        final IDrawableStatic chest = guiHelper.drawableBuilder(chestLocation, 6, 16, 164, 56).build();
+        final Identifier dispenserLocation = new Identifier(Identifier.DEFAULT_NAMESPACE, "textures/gui/container/dispenser.png");
+        final IDrawableStatic dispenser = guiHelper.drawableBuilder(dispenserLocation, 6, 16, 164, 56).build();
+        final Identifier hopperLocation = new Identifier(Identifier.DEFAULT_NAMESPACE, "textures/gui/container/hopper.png");
+        final IDrawableStatic hopper = guiHelper.drawableBuilder(hopperLocation, 6, 16, 164, 24).build();
+
+        final Registry<RecipeCategory> registry = world.getRegistryManager().get(RegistryUtils.RECIPE_CATEGORY);
+        registry.getIds().forEach(id -> {
+            final RecipeCategory recipeCategory = registry.get(id);
+            if(recipeCategory == null) return;
+            final RecipeType<CraftingRecipe> recipeType = RecipeType.create(id.getNamespace(), id.getPath(), CraftingRecipe.class);
+            final DatapackItemUtils.DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
+
+            if(item == null) {
+                LOGGER.warn("Failed to load icon " + recipeCategory.icon());
+                return;
+            }
+
+            IRecipeCategory<CraftingRecipe> category;
+            switch (recipeCategory.inventoryType()) {
+                case "chest", "barrel", "shulker_box"
+                        -> category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), chest, guiHelper.createDrawableItemStack(item.itemStack()));
+                case "dispenser", "dropper"
+                        -> category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), dispenser, guiHelper.createDrawableItemStack(item.itemStack()));
+                case "hopper"
+                        -> category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), hopper, guiHelper.createDrawableItemStack(item.itemStack()));
+                default -> {
+                    LOGGER.warn("Invalid inventory type " + recipeCategory.inventoryType());
+                    return;
+                }
+            }
+            RECIPETYPES.put(id, recipeType);
+            registration.addRecipeCategories(category);
+        });
     }
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        final List<CraftingRecipe> recipes = new ArrayList<>();
+        final ClientWorld world = MinecraftClient.getInstance().world;
+        if(world == null)
+            return;
 
-        final DefaultedList<Ingredient> input = DefaultedList.ofSize(0);
-        final NbtCompound inData = new NbtCompound();
-        inData.putString("id", "minecraft:stick");
-        inData.putByte("Count", (byte)2);
-        final NbtCompound inDataTag = new NbtCompound();
-        inDataTag.putBoolean("test",true);
-        inData.put("tag",inDataTag);
-        input.add(Ingredient.ofStacks(ItemStack.fromNbt(inData)));
-        final ItemStack out = new ItemStack(Registries.ITEM.get(new Identifier("stick")));
-        recipes.add(new ShapedRecipe(ID, "test", CraftingRecipeCategory.MISC, 1, 1, input, out));
+        final Map<String,List<CraftingRecipe>> recipes = new HashMap<>();
+        final Registry<ComRecipe> registry = world.getRegistryManager().get(RegistryUtils.RECIPES);
+        final Registry<DatapackItemUtils.DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
 
-        registration.addRecipes(HEAVYWORKBENCH, recipes);
+        registry.getIds().forEach(id -> {
+            final ComRecipe recipe = registry.get(id);
+            if(recipe == null) return;
+            try {
+                final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe);
+                final ItemStack output = new ItemStack(Registries.ITEM.get(new Identifier("stick")));
+                recipes.putIfAbsent(recipe.category(),new ArrayList<>());
+                recipes.get(recipe.category()).add(new ShapedRecipe(ID, "test", CraftingRecipeCategory.MISC, 3, 3, ingredients, output));
+            } catch(Exception e) {
+                LOGGER.warn("Failed to parse smithed recipe " + id);
+                LOGGER.warn(String.valueOf(e));
+            }
+        });
+
+        for(Map.Entry<String,List<CraftingRecipe>> entry: recipes.entrySet()) {
+            if(RECIPETYPES.containsKey(new Identifier(entry.getKey()))) {
+                final RecipeType<CraftingRecipe> type = RECIPETYPES.get(new Identifier(entry.getKey()));
+                registration.addRecipes(type, entry.getValue());
+            } else {
+                LOGGER.warn("Missing recipe category " + entry.getKey());
+            }
+        }
     }
 
 }

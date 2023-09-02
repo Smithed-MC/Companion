@@ -14,7 +14,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-public class DynamicCategory<T extends Recipe<?>> implements IRecipeCategory<T> {
+public abstract class DynamicCategory<T extends Recipe<?>> implements IRecipeCategory<T> {
 
     private final RecipeType<T> recipeType;
     private final Text title;
@@ -52,17 +52,4 @@ public class DynamicCategory<T extends Recipe<?>> implements IRecipeCategory<T> 
         return icon;
     }
 
-    @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
-        final ClientWorld world = MinecraftClient.getInstance().world;
-        if(world != null) {
-            int i = 0;
-            for (Ingredient ingredient : recipe.getIngredients()) {
-                builder.addSlot(RecipeIngredientRole.INPUT, 0, i).addIngredients(ingredient);
-                i += 8;
-            }
-            builder.addSlot(RecipeIngredientRole.OUTPUT, 15, 15).addItemStack(recipe.getOutput(world.getRegistryManager()));
-        }
-
-    }
 }

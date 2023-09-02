@@ -19,7 +19,11 @@
     },
     {
       "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:toast"
+      "id" : "smithed:super_tnt"
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:super_gunpowder"
     }
   ]
 }

@@ -21,6 +21,6 @@ public class ClientWorldMixin implements DatapackItemUtils.DatapackItemHandler {
 
     @Override
     public void registerItem(DatapackItemUtils.DatapackItem item) {
-        datapackItems.put(item.getIdentifier(), item.getStack());
+        datapackItems.put(item.identifier(), item.itemStack());
     }
 }
