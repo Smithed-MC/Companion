@@ -3,7 +3,6 @@ package dev.smithed.companion.utils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
@@ -27,21 +26,18 @@ public class ItemGroupUtils {
      */
     public static class ItemGroupData {
 
-        private Identifier identifier;
         private ItemStack icon;
         private Text display_name;
         private String texture;
         private List<Entry> entries;
 
-        public ItemGroupData(Identifier identifier, ItemStack icon, Text display_name, String texture, List<Entry> entries) {
-            this.identifier = identifier;
+        public ItemGroupData(ItemStack icon, Text display_name, String texture, List<Entry> entries) {
             this.icon = icon;
             this.display_name = display_name;
             this.texture = texture;
             this.entries = entries;
         }
 
-        public Identifier getIdentifier() { return this.identifier; }
         public ItemStack getIcon() { return this.icon; }
         public Text getDisplayName() { return this.display_name.copy(); }
         public String getTexture() { return this.texture; }
@@ -52,7 +48,6 @@ public class ItemGroupUtils {
          */
         public static Codec<ItemGroupData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Identifier.CODEC.fieldOf("identifier").forGetter(ItemGroupData::getIdentifier),
                     ItemStack.CODEC.fieldOf("icon").forGetter(ItemGroupData::getIcon),
                     Codecs.TEXT.fieldOf("display_name").forGetter(ItemGroupData::getDisplayName),
                     Codecs.NON_EMPTY_STRING.optionalFieldOf("texture","items.png").forGetter(ItemGroupData::getTexture),
@@ -154,7 +149,7 @@ public class ItemGroupUtils {
 
             @Override
             public Collection<ItemStack> getCollection(World world) {
-                return List.of(((DatapackItemUtils.DatapackItemHandler)world).getDatapackItem(identifier));
+                return List.of(((DatapackItemUtils.DatapackItemHandler)world).smithed$getDatapackItem(identifier));
             }
         }
 
