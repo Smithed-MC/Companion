@@ -1,6 +1,7 @@
 package dev.smithed.companion.utils;
 
 import com.mojang.serialization.Lifecycle;
+import dev.smithed.companion.registry.DatapackItem;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -15,7 +16,7 @@ public class RegistryUtils {
      */
     public static final RegistryKey<Registry<ShortcutUtils.ShortcutData>> SHORTCUT_REGISTRY = RegistryKey.ofRegistry(modID("shortcuts"));
     public static final RegistryKey<Registry<ItemGroupUtils.ItemGroupData>> ITEMGROUP_REGISTRY = RegistryKey.ofRegistry(modID("item_groups"));
-    public static final RegistryKey<Registry<DatapackItemUtils.DatapackItem>> DATAPACK_ITEM_REGISTRY = RegistryKey.ofRegistry(modID("datapack_items"));
+    public static final RegistryKey<Registry<DatapackItem>> DATAPACK_ITEM_REGISTRY = RegistryKey.ofRegistry(modID("datapack_items"));
     public static final RegistryKey<Registry<ItemGroupUtils.Entry.EntryType>> GROUP_ENTRY_TYPE_REGISTRY = RegistryKey.ofRegistry(modID("group_entries"));
 
     /*
@@ -37,7 +38,7 @@ public class RegistryUtils {
     private static void registerDynamicRegistries() {
         DynamicRegistries.registerSynced(SHORTCUT_REGISTRY, ShortcutUtils.ShortcutData.CODEC);
         DynamicRegistries.registerSynced(ITEMGROUP_REGISTRY, ItemGroupUtils.ItemGroupData.CODEC);
-        DynamicRegistries.registerSynced(DATAPACK_ITEM_REGISTRY, DatapackItemUtils.DatapackItem.CODEC);
+        DynamicRegistries.registerSynced(DATAPACK_ITEM_REGISTRY, DatapackItem.CODEC);
     }
 
     /*

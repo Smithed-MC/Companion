@@ -2,6 +2,7 @@ package dev.smithed.companion.utils;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.smithed.companion.registry.DatapackItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -149,7 +150,7 @@ public class ItemGroupUtils {
 
             @Override
             public Collection<ItemStack> getCollection(World world) {
-                return List.of(((DatapackItemUtils.DatapackItemHandler)world).smithed$getDatapackItem(identifier));
+                return List.of(((DatapackItem.DatapackItemHandler)world).smithed$getDatapackItem(identifier));
             }
         }
 
