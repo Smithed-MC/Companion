@@ -26,7 +26,7 @@
     },
     {
       "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:test"
+      "id" : "smithed:testy"
     }
   ]
 }
