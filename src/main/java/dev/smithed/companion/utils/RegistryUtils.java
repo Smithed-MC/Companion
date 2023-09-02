@@ -2,6 +2,7 @@ package dev.smithed.companion.utils;
 
 import com.mojang.serialization.Lifecycle;
 import dev.smithed.companion.registry.ComRecipe;
+import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.registry.RecipeCategory;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.registry.Registry;
@@ -42,7 +43,6 @@ public class RegistryUtils {
         DynamicRegistries.registerSynced(SHORTCUT_REGISTRY, ShortcutUtils.ShortcutData.CODEC);
         DynamicRegistries.registerSynced(ITEMGROUP_REGISTRY, ItemGroupUtils.ItemGroupData.CODEC);
         DynamicRegistries.registerSynced(DATAPACK_ITEM_REGISTRY, DatapackItem.CODEC);
-        DynamicRegistries.registerSynced(DATAPACK_ITEM_REGISTRY, DatapackItemUtils.DatapackItem.CODEC);
         DynamicRegistries.registerSynced(RECIPE_CATEGORY, RecipeCategory.CODEC);
         DynamicRegistries.registerSynced(RECIPES, ComRecipe.CODEC);
     }

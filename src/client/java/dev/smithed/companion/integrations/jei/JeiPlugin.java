@@ -2,7 +2,7 @@ package dev.smithed.companion.integrations.jei;
 
 import dev.smithed.companion.SmithedMain;
 import dev.smithed.companion.registry.ComRecipe;
-import dev.smithed.companion.utils.DatapackItemUtils;
+import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.utils.RegistryUtils;
 import dev.smithed.companion.registry.RecipeCategory;
 import mezz.jei.api.IModPlugin;
@@ -17,7 +17,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.ShapedRecipe;
@@ -56,11 +55,13 @@ public class JeiPlugin implements IModPlugin {
         if(world == null)
             return;
 
-        final Registry<DatapackItemUtils.DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
+        final Registry<DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
         registry.forEach(datapackItem -> {
-            final ItemStack item = datapackItem.itemStack();
+            final ItemStack item = datapackItem.stack();
             SUBTYPES.putIfAbsent(item.getItem(), new AllNbtSubtype());
-            SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), datapackItem.identifier().toString());
+            final Identifier id = registry.getId(datapackItem);
+            if(id == null) return;
+            SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), id.toString());
         });
         for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
             registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
@@ -88,7 +89,7 @@ public class JeiPlugin implements IModPlugin {
             final RecipeCategory recipeCategory = registry.get(id);
             if(recipeCategory == null) return;
             final RecipeType<CraftingRecipe> recipeType = RecipeType.create(id.getNamespace(), id.getPath(), CraftingRecipe.class);
-            final DatapackItemUtils.DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
+            final DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
 
             if(item == null) {
                 LOGGER.warn("Failed to load icon " + recipeCategory.icon());
@@ -98,11 +99,11 @@ public class JeiPlugin implements IModPlugin {
             IRecipeCategory<CraftingRecipe> category;
             switch (recipeCategory.inventoryType()) {
                 case "chest", "barrel", "shulker_box"
-                        -> category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), chest, guiHelper.createDrawableItemStack(item.itemStack()));
+                        -> category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), chest, guiHelper.createDrawableItemStack(item.stack()));
                 case "dispenser", "dropper"
-                        -> category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), dispenser, guiHelper.createDrawableItemStack(item.itemStack()));
+                        -> category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), dispenser, guiHelper.createDrawableItemStack(item.stack()));
                 case "hopper"
-                        -> category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), hopper, guiHelper.createDrawableItemStack(item.itemStack()));
+                        -> category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), hopper, guiHelper.createDrawableItemStack(item.stack()));
                 default -> {
                     LOGGER.warn("Invalid inventory type " + recipeCategory.inventoryType());
                     return;
@@ -121,7 +122,7 @@ public class JeiPlugin implements IModPlugin {
 
         final Map<String,List<CraftingRecipe>> recipes = new HashMap<>();
         final Registry<ComRecipe> registry = world.getRegistryManager().get(RegistryUtils.RECIPES);
-        final Registry<DatapackItemUtils.DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
+        final Registry<DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
 
         registry.getIds().forEach(id -> {
             final ComRecipe recipe = registry.get(id);

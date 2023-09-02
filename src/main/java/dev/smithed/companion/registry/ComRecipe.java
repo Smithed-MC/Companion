@@ -2,7 +2,6 @@ package dev.smithed.companion.registry;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.smithed.companion.utils.DatapackItemUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.Ingredient;
@@ -23,14 +22,14 @@ public record ComRecipe(List<String> pattern, NbtCompound key, String category) 
             ).apply(instance, ComRecipe::new)
     );
 
-    public static DefaultedList<Ingredient> computeRecipe(Registry<DatapackItemUtils.DatapackItem> registry, ComRecipe recipe) {
+    public static DefaultedList<Ingredient> computeRecipe(Registry<DatapackItem> registry, ComRecipe recipe) {
         final Map<Character,Ingredient> keys = new HashMap<>();
         final DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(27, Ingredient.empty());
 
         recipe.key().getKeys().forEach(key -> {
-            if(key.length() != 1) return;
+            if(key.length() != 1) throw new NullPointerException();
             final NbtCompound entry = (NbtCompound) recipe.key().get(key);
-            final ItemStack input = DatapackItemUtils.parseItemEntry(registry, entry);
+            final ItemStack input = DatapackItem.parseItemEntry(registry, entry);
             keys.put(key.charAt(0), Ingredient.ofStacks(input));
         });
 
