@@ -6,6 +6,8 @@ import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.utils.RegistryUtils;
 import dev.smithed.companion.registry.RecipeCategory;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
@@ -14,6 +16,7 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -21,7 +24,6 @@ import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
-import net.minecraft.registry.Registries;
 
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -98,12 +100,27 @@ public class JeiPlugin implements IModPlugin {
 
             IRecipeCategory<CraftingRecipe> category;
             switch (recipeCategory.inventoryType()) {
-                case "chest", "barrel", "shulker_box"
-                        -> category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), chest, guiHelper.createDrawableItemStack(item.stack()));
-                case "dispenser", "dropper"
-                        -> category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), dispenser, guiHelper.createDrawableItemStack(item.stack()));
-                case "hopper"
-                        -> category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), hopper, guiHelper.createDrawableItemStack(item.stack()));
+                case "chest", "barrel", "shulker_box" -> {
+                    IDrawable gui = chest;
+                    System.out.println("Flag 1 " + recipeCategory);
+                    if(recipeCategory.background().isPresent()) {
+                        gui = new LayeredDrawable(gui, recipeCategory.background().get());
+                        System.out.println("Flag 2");
+                    }
+                    category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
+                }
+                case "dispenser", "dropper" -> {
+                    IDrawable gui = dispenser;
+                    if(recipeCategory.background().isPresent())
+                        gui = new LayeredDrawable(gui, recipeCategory.background().get());
+                    category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
+                }
+                case "hopper" -> {
+                    IDrawable gui = hopper;
+                    if(recipeCategory.background().isPresent())
+                        gui = new LayeredDrawable(gui, recipeCategory.background().get());
+                    category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
+                }
                 default -> {
                     LOGGER.warn("Invalid inventory type " + recipeCategory.inventoryType());
                     return;
@@ -129,7 +146,7 @@ public class JeiPlugin implements IModPlugin {
             if(recipe == null) return;
             try {
                 final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe);
-                final ItemStack output = new ItemStack(Registries.ITEM.get(new Identifier("stick")));
+                final ItemStack output = recipe.result().getItemStack(itemRegistry);
                 recipes.putIfAbsent(recipe.category(),new ArrayList<>());
                 recipes.get(recipe.category()).add(new ShapedRecipe(ID, "test", CraftingRecipeCategory.MISC, 3, 3, ingredients, output));
             } catch(Exception e) {

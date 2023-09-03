@@ -26,7 +26,11 @@
     },
     {
       "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:testy"
+      "id" : "smithed:super_gunpowder"
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:super_tnt"
     }
   ]
 }

@@ -14,5 +14,9 @@
       "id" : "smithed:super_gunpowder"
     }
   },
+  "result": {
+    "type" : "smithed:datapack_item_entry",
+    "id" : "smithed:super_tnt"
+  },
   "category": "smithed:heavy_workbench"
 }
