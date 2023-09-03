@@ -102,11 +102,8 @@ public class JeiPlugin implements IModPlugin {
             switch (recipeCategory.inventoryType()) {
                 case "chest", "barrel", "shulker_box" -> {
                     IDrawable gui = chest;
-                    System.out.println("Flag 1 " + recipeCategory);
-                    if(recipeCategory.background().isPresent()) {
+                    if(recipeCategory.background().isPresent())
                         gui = new LayeredDrawable(gui, recipeCategory.background().get());
-                        System.out.println("Flag 2");
-                    }
                     category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
                 }
                 case "dispenser", "dropper" -> {
@@ -148,7 +145,7 @@ public class JeiPlugin implements IModPlugin {
                 final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
                 recipes.putIfAbsent(recipe.category(),new ArrayList<>());
-                recipes.get(recipe.category()).add(new ShapedRecipe(ID, "test", CraftingRecipeCategory.MISC, 3, 3, ingredients, output));
+                recipes.get(recipe.category()).add(new ShapedRecipe(ID, "misc", CraftingRecipeCategory.MISC, 27, 3, ingredients, output));
             } catch(Exception e) {
                 LOGGER.warn("Failed to parse smithed recipe " + id);
                 LOGGER.warn(String.valueOf(e));

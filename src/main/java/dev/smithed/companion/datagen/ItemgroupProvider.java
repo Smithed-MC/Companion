@@ -1,16 +1,11 @@
 package dev.smithed.companion.datagen;
 
-import dev.smithed.companion.utils.ItemGroupUtils;
 import dev.smithed.companion.utils.RegistryUtils;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static dev.smithed.companion.SmithedMain.modID;

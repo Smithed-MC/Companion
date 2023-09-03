@@ -24,48 +24,37 @@ public class ItemContainer {
         ).apply(instance, ItemContainer::new));
 
     private ItemContainer(String type, Identifier id, ItemStack itemStack) {
-        this.type = type;
-
-        if(id.getPath().equals(""))
-            this.id = null;
-        else
-            this.id = id;
-
-        if(itemStack == ItemStack.EMPTY)
-            this.itemStack = null;
-        else
-            this.itemStack = itemStack;
-
-        if(type.equals("smithed:item_entry") && this.id == null && this.itemStack == null)
+        final boolean isIdEmpty = id.getPath().equals("");
+        if(type.equals("smithed:item_entry") && isIdEmpty && itemStack == ItemStack.EMPTY)
             throw new CodecException("smithed:item_entry requires an 'id' field or an 'item' field");
-        if(type.equals("smithed:datapack_item_entry") && this.id == null)
+        if(type.equals("smithed:datapack_item_entry") && isIdEmpty)
             throw new CodecException("smithed:datapack_item_entry requires an 'id' field");
+
+        this.type = type;
+        this.id = id;
+        if(isIdEmpty)
+            this.itemStack = itemStack;
+        else
+            this.itemStack = new ItemStack(Registries.ITEM.get(this.id));
     }
 
     private String getType() {
         return type;
     }
 
-    public boolean hasId() {
-        return id == null;
-    }
-
     @Nullable
-    public Identifier getId() {
+    private Identifier getId() {
         return id;
     }
 
     @Nullable
-    public ItemStack getItemStack() {
+    private ItemStack getItemStack() {
         return itemStack;
     }
 
     public ItemStack getItemStack(Registry<DatapackItem> registry) {
         if(type.equals("smithed:item_entry")) {
-            if(id != null)
-                return new ItemStack(Registries.ITEM.get(this.id));
-            else
-                return this.itemStack;
+            return this.itemStack;
         }
         if(type.equals("smithed:datapack_item_entry")) {
                 final DatapackItem item = registry.get(this.id);
@@ -75,4 +64,10 @@ public class ItemContainer {
         return null;
     }
 
+    @Override
+    public String toString() {
+        if(type.equals("smithed:datapack_item_entry"))
+            return "ItemContainer[type=smithed:datapack_item_entry, id=" + this.id + "]";
+        return "ItemContainer[type=smithed:item_entry, itemStack=" + this.itemStack + "]";
+    }
 }

@@ -1,7 +1,10 @@
 {
   "icon" : {
-    "id" : "minecraft:stone",
-    "Count" : 1
+    "type" : "smithed:item_entry",
+    "item" : {
+      "id" : "minecraft:stone",
+      "Count" : 1
+    }
   },
   "display_name" : {
     "text" : "foobar",
