@@ -14,18 +14,14 @@
   "entries" : [
     {
       "type" : "smithed:item_entry",
+      "id" : "minecraft:gunpowder"
+    },
+    {
+      "type" : "smithed:item_entry",
       "item" : {
-        "id" : "minecraft:stone",
+        "id" : "minecraft:tnt",
         "Count" : 1
       }
-    },
-    {
-      "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:foo"
-    },
-    {
-      "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:test"
     },
     {
       "type" : "smithed:datapack_item_entry",

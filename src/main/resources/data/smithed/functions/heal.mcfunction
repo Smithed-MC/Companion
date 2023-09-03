@@ -1,1 +1,1 @@
-kill @s
+effect give @s instant_health 1 100 true
