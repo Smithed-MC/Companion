@@ -4,21 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.smithed.companion.utils.ServerEventUtils;
 import io.netty.handler.codec.CodecException;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameter;
+import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +19,8 @@ import java.util.Map;
 Creates a datapack item bound registry, which serves to act as a stand-in for datapack items and their associated data
  */
 public class DatapackItem {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("smithed-companion");
 
     private ItemStack stack;
     private final Identifier id;
@@ -53,15 +48,23 @@ public class DatapackItem {
     }
 
     private ItemStack resolveLootTable() {
-        final MinecraftServer server = ServerEventUtils.getCurrentServer();
-        final List<ItemStack> loot = server.getLootManager().getLootTable(id).generateLoot(new LootContextParameterSet(server.getOverworld(), Map.of(), Map.of(), 0f));
-        if(loot.size() != 1)
-            throw new CodecException("DatapackItem loot table entry must return exactly 1 item, actually returned " + loot.size() + " items");
-        return loot.get(0);
+        try {
+            final MinecraftServer server = ServerEventUtils.getCurrentServer();
+            final LootTable lootTable = server.getLootManager().getLootTable(id);
+            if (lootTable == null)
+                throw new NullPointerException("No loot table found at " + id);
+            final List<ItemStack> loot = lootTable.generateLoot(new LootContextParameterSet(server.getOverworld(), Map.of(), Map.of(), 0f));
+            if (loot.size() != 1)
+                throw new CodecException("DatapackItem loot table " + id + " must return exactly 1 item, actually returned " + loot.size() + " items");
+            return loot.get(0);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to assign loot table " + id + " to DatapackItem. " + e.getLocalizedMessage());
+            return ItemStack.EMPTY;
+        }
     }
 
     public ItemStack stack() {
-        if(this.stack == null)
+        if (this.stack == null)
             this.stack = resolveLootTable();
         return stack;
     }

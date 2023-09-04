@@ -6,14 +6,17 @@ import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.utils.RegistryUtils;
 import dev.smithed.companion.registry.RecipeCategory;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.library.load.registration.SubtypeRegistration;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
@@ -64,6 +67,13 @@ public class JeiPlugin implements IModPlugin {
             SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), id.toString());
         });
         for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
+            if(registration instanceof SubtypeRegistration subtype) {
+                Optional<IIngredientSubtypeInterpreter<ItemStack>> interpreter = subtype.getInterpreters().get(VanillaTypes.ITEM_STACK, new ItemStack(entry.getKey()));
+                if(interpreter.isPresent()) {
+                    LOGGER.warn("Failed to register subtype for " + entry.getKey() + ". JEI probably registers its own subtype for this item.");
+                    return;
+                }
+            }
             registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
         }
     }
@@ -92,7 +102,7 @@ public class JeiPlugin implements IModPlugin {
             final DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
 
             if(item == null) {
-                LOGGER.warn("Failed to load recipe " + id + " icon " + recipeCategory.icon());
+                LOGGER.warn("Failed to load smithed recipe category " + id + " icon " + recipeCategory.icon());
                 return;
             }
 
@@ -145,8 +155,7 @@ public class JeiPlugin implements IModPlugin {
                 recipes.putIfAbsent(recipe.category(),new ArrayList<>());
                 recipes.get(recipe.category()).add(new ShapedRecipe(ID, "misc", CraftingRecipeCategory.MISC, 27, 3, ingredients, output));
             } catch(Exception e) {
-                LOGGER.warn("Failed to parse smithed recipe " + id);
-                LOGGER.warn(String.valueOf(e));
+                LOGGER.warn("Failed to parse smithed recipe " + id + "." + e.getLocalizedMessage());
             }
         });
 
@@ -155,7 +164,7 @@ public class JeiPlugin implements IModPlugin {
                 final RecipeType<CraftingRecipe> type = RECIPETYPES.get(new Identifier(entry.getKey()));
                 registration.addRecipes(type, entry.getValue());
             } else {
-                LOGGER.warn("Missing recipe category " + entry.getKey());
+                LOGGER.warn("Missing smithed recipe category " + entry.getKey());
             }
         }
     }
