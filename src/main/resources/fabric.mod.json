@@ -14,7 +14,7 @@
 		"sources": "https://github.com/Smithed-MC/Companion/tree/main"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/smithed-companion/icon.png",
+	"icon": "assets/smithed/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -25,12 +25,15 @@
 		],
 		"fabric-datagen": [
 			"dev.smithed.companion.datagen.SmithedDatagen"
+		],
+		"jei_mod_plugin": [
+			"dev.smithed.companion.integrations.jei.JeiPlugin"
 		]
 	},
 	"mixins": [
-		"smithed-companion.mixins.json",
+		"smithed.mixins.json",
 		{
-			"config": "smithed-companion.client.mixins.json",
+			"config": "smithed.client.mixins.json",
 			"environment": "client"
 		}
 	],

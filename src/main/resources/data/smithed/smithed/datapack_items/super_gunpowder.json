@@ -1,0 +1,11 @@
+{
+  "item" : {
+    "id" : "minecraft:gunpowder",
+    "Count" : 1,
+    "tag": {
+      "display": {
+        "Name": "{\"text\":\"Super Gunpowder\",\"color\":\"white\",\"italic\":false}"
+      }
+    }
+  }
+}

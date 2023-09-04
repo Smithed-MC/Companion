@@ -1,7 +1,10 @@
 {
   "icon" : {
-    "id" : "minecraft:stone",
-    "Count" : 1
+    "type" : "smithed:item_entry",
+    "item" : {
+      "id" : "minecraft:stone",
+      "Count" : 1
+    }
   },
   "display_name" : {
     "text" : "foobar",
@@ -11,22 +14,22 @@
   "entries" : [
     {
       "type" : "smithed:item_entry",
+      "id" : "minecraft:gunpowder"
+    },
+    {
+      "type" : "smithed:item_entry",
       "item" : {
-        "id" : "minecraft:stone",
+        "id" : "minecraft:tnt",
         "Count" : 1
       }
     },
     {
       "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:foo"
+      "id" : "smithed:super_gunpowder"
     },
     {
       "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:test"
-    },
-    {
-      "type" : "smithed:datapack_item_entry",
-      "id" : "smithed:testy"
+      "id" : "smithed:super_tnt"
     }
   ]
 }

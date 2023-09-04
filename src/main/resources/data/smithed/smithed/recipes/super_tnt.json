@@ -1,0 +1,33 @@
+{
+  "pattern": [
+    "  SSS    ",
+    "  GGG  O ",
+    "  RRR    "
+  ],
+  "key": {
+    "S": {
+      "type" : "smithed:item_entry",
+      "id": "minecraft:sand"
+    },
+    "R": {
+      "type" : "smithed:item_entry",
+      "item": {
+        "id": "minecraft:red_sand",
+        "Count": 1
+      }
+    },
+    "G": {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:super_gunpowder"
+    },
+    "O": {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:super_tnt"
+    }
+  },
+  "result": {
+    "type" : "smithed:datapack_item_entry",
+    "id" : "smithed:super_tnt"
+  },
+  "category": "smithed:heavy_workbench"
+}

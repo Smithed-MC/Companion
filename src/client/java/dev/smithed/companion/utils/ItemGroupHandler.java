@@ -1,15 +1,12 @@
 package dev.smithed.companion.utils;
 
-import dev.smithed.companion.SmithedMain;
+import dev.smithed.companion.registry.DatapackItem;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.impl.client.itemgroup.CreativeGuiExtensions;
-import net.fabricmc.fabric.mixin.itemgroup.ItemGroupsMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -35,6 +32,7 @@ public class ItemGroupHandler {
     public static void loadGroups(ClientPlayNetworkHandler networkHandler, PacketSender packetSender, MinecraftClient client) {
         if(client.world != null) {
             var itemGroupRegistry = client.world.getRegistryManager().get(RegistryUtils.ITEMGROUP_REGISTRY);
+            final Registry<DatapackItem> datapackItemRegistry = client.world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
 
             /*
             Iterate through each entry and write the corresponding data into an Itemgroup
@@ -43,17 +41,18 @@ public class ItemGroupHandler {
             RegistryUtils.thawRegistry(Registries.ITEM_GROUP);
             itemGroupRegistry.forEach(itemGroupData -> {
                 var Itemgroup = FabricItemGroup.builder()
-                        .displayName(itemGroupData.getDisplayName())
-                        .icon(itemGroupData::getIcon)
-                        .texture(itemGroupData.getTexture())
-                        .entries((displayContext, entries) -> {
-                            itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection(client.world)));
-                        })
-                        .build();
-                Registry.register(Registries.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData).toString(), Itemgroup);
+                    .displayName(itemGroupData.displayName())
+                    .icon(itemGroupData.icon().getItemStack(datapackItemRegistry)::copy)
+                    .texture(itemGroupData.texture())
+                    .entries(
+                        (displayContext, entries) -> itemGroupData.entries().forEach(
+                            entry -> entries.add(entry.getItemStack(datapackItemRegistry).copyWithCount(1))
+                        )
+                    )
+                    .build();
+                Registry.register(Registries.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData), Itemgroup);
                 registeredItemGroups.add(RegistryKey.of(RegistryKeys.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData)));
             });
-
             Registries.ITEM_GROUP.freeze();
             ItemGroups.collect();
         }
