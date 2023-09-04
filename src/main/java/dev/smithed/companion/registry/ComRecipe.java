@@ -22,8 +22,8 @@ public record ComRecipe(List<String> pattern, Map<String,ItemContainer> keys, It
             ).apply(instance, ComRecipe::new)
     );
 
-    public static DefaultedList<Ingredient> computeRecipe(Registry<DatapackItem> registry, ComRecipe recipe) {
-        final DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(27, Ingredient.empty());
+    public static DefaultedList<Ingredient> computeRecipe(Registry<DatapackItem> registry, ComRecipe recipe, int size) {
+        final DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(size, Ingredient.empty());
 
         int offset = 0;
         for(String line: recipe.pattern()) {

@@ -1,0 +1,15 @@
+{
+  "icon" : {
+    "type" : "smithed:item_entry",
+    "item" : {
+      "id" : "minecraft:stone",
+      "Count" : 1
+    }
+  },
+  "display_name" : {
+    "text" : "Error Test - Bad Entries",
+    "color" : "white"
+  },
+  "texture" :  "",
+  "entries" : []
+}

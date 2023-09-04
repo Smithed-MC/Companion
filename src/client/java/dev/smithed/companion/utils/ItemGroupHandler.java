@@ -48,6 +48,10 @@ public class ItemGroupHandler {
             RegistryUtils.thawRegistry(Registries.ITEM_GROUP);
             itemGroupRegistry.forEach(itemGroupData -> {
                 try {
+                    if(itemGroupData.icon().getItemStack(datapackItemRegistry).getCount() == 0)
+                        throw new CodecException("Invalid icon for ItemGroup " + itemGroupRegistry.getId(itemGroupData));
+                    if(itemGroupData.entries().size() == 0)
+                        return;
                     final ItemGroup itemgroup = FabricItemGroup.builder()
                         .displayName(itemGroupData.displayName())
                         .icon(itemGroupData.icon().getItemStack(datapackItemRegistry)::copy)

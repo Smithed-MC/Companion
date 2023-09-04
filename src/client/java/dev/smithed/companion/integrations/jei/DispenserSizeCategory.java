@@ -33,4 +33,8 @@ public class DispenserSizeCategory<T extends Recipe<?>> extends DynamicCategory<
         }
         builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getOutput(world.getRegistryManager()));
     }
+
+    public int[] getSize() {
+        return new int[]{3,3};
+    }
 }

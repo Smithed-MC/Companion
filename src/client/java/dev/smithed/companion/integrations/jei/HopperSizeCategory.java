@@ -33,4 +33,8 @@ public class HopperSizeCategory<T extends Recipe<?>> extends DynamicCategory<T> 
         }
         builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getOutput(world.getRegistryManager()));
     }
+
+    public int[] getSize() {
+        return new int[]{5,1};
+    }
 }
