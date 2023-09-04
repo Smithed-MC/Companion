@@ -1,11 +1,15 @@
 package dev.smithed.companion.utils;
 
+import dev.smithed.companion.SmithedMain;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.impl.client.itemgroup.CreativeGuiExtensions;
+import net.fabricmc.fabric.mixin.itemgroup.ItemGroupsMixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -41,12 +45,13 @@ public class ItemGroupHandler {
                 var Itemgroup = FabricItemGroup.builder()
                         .displayName(itemGroupData.getDisplayName())
                         .icon(itemGroupData::getIcon)
+                        .texture(itemGroupData.getTexture())
                         .entries((displayContext, entries) -> {
-                            itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection()));
+                            itemGroupData.getEntries().forEach(entry -> entries.addAll(entry.getCollection(client.world)));
                         })
                         .build();
-                Registry.register(Registries.ITEM_GROUP, itemGroupData.getIdentifier(), Itemgroup);
-                registeredItemGroups.add(RegistryKey.of(RegistryKeys.ITEM_GROUP, itemGroupData.getIdentifier()));
+                Registry.register(Registries.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData).toString(), Itemgroup);
+                registeredItemGroups.add(RegistryKey.of(RegistryKeys.ITEM_GROUP, itemGroupRegistry.getId(itemGroupData)));
             });
 
             Registries.ITEM_GROUP.freeze();
@@ -63,9 +68,8 @@ public class ItemGroupHandler {
      */
     public static void discardGroups(ClientPlayNetworkHandler networkHandler, MinecraftClient client) {
         RegistryUtils.thawRegistry(Registries.ITEM_GROUP);
-        registeredItemGroups.forEach(itemgroup -> {
-            RegistryUtils.removeRegistryEntry(Registries.ITEM_GROUP, itemgroup);
-        });
+        registeredItemGroups.forEach(itemgroup -> RegistryUtils.removeRegistryEntry(Registries.ITEM_GROUP, itemgroup));
+        registeredItemGroups.clear();
         Registries.ITEM_GROUP.freeze();
         ItemGroups.collect();
     }

@@ -23,7 +23,6 @@ public class ItemgroupProvider extends FabricDynamicRegistryProvider {
     @Override
     protected void configure(RegistryWrapper.WrapperLookup registries, Entries entries) {
         var key = RegistryKey.of(RegistryUtils.ITEMGROUP_REGISTRY, modID("testing"));
-        entries.add(key, new ItemGroupUtils.ItemGroupData(modID("testing"), ItemStack.EMPTY, Text.literal("foo"), List.of(new ItemGroupUtils.Entry.ItemEntry(Items.STONE.getDefaultStack()))));
     }
 
     @Override

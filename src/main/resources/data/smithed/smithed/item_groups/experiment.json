@@ -1,10 +1,13 @@
 {
-  "identifier" : "smithed:test",
   "icon" : {
     "id" : "minecraft:stone",
     "Count" : 1
   },
-  "display_name" : "{\"text\":\"This house is bitching\"}",
+  "display_name" : {
+    "text" : "foobar",
+    "color" : "white"
+  },
+  "texture" :  "",
   "entries" : [
     {
       "type" : "smithed:item_entry",
@@ -12,6 +15,18 @@
         "id" : "minecraft:stone",
         "Count" : 1
       }
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:foo"
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:test"
+    },
+    {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:testy"
     }
   ]
 }

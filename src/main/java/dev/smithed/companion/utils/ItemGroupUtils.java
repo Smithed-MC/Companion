@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,21 +26,21 @@ public class ItemGroupUtils {
      */
     public static class ItemGroupData {
 
-        private Identifier identifier;
         private ItemStack icon;
         private Text display_name;
+        private String texture;
         private List<Entry> entries;
 
-        public ItemGroupData(Identifier identifier, ItemStack icon, Text display_name, List<Entry> entries) {
-            this.identifier = identifier;
+        public ItemGroupData(ItemStack icon, Text display_name, String texture, List<Entry> entries) {
             this.icon = icon;
             this.display_name = display_name;
+            this.texture = texture;
             this.entries = entries;
         }
 
-        public Identifier getIdentifier() { return this.identifier; }
         public ItemStack getIcon() { return this.icon; }
-        public Text getDisplayName() { return this.display_name; }
+        public Text getDisplayName() { return this.display_name.copy(); }
+        public String getTexture() { return this.texture; }
         public List<Entry> getEntries() { return this.entries; }
 
         /*
@@ -47,9 +48,9 @@ public class ItemGroupUtils {
          */
         public static Codec<ItemGroupData> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Identifier.CODEC.fieldOf("identifier").forGetter(ItemGroupData::getIdentifier),
                     ItemStack.CODEC.fieldOf("icon").forGetter(ItemGroupData::getIcon),
                     Codecs.TEXT.fieldOf("display_name").forGetter(ItemGroupData::getDisplayName),
+                    Codecs.NON_EMPTY_STRING.optionalFieldOf("texture","items.png").forGetter(ItemGroupData::getTexture),
                     ENTRY_CODEC.listOf().fieldOf("entries").forGetter(ItemGroupData::getEntries)
             ).apply(instance, ItemGroupData::new)
         );
@@ -64,7 +65,7 @@ public class ItemGroupUtils {
             return null;
         }
 
-        public Collection<ItemStack> getCollection() {
+        public Collection<ItemStack> getCollection(World world) {
             return null;
         }
 
@@ -113,7 +114,7 @@ public class ItemGroupUtils {
             public EntryType getType() { return new EntryType(CODEC); }
 
             @Override
-            public Collection<ItemStack> getCollection() {
+            public Collection<ItemStack> getCollection(World world) {
                 return List.of(item_stack);
             }
 
@@ -128,6 +129,28 @@ public class ItemGroupUtils {
          */
         public static class SortedEntry extends Entry {
 
+        }
+
+        public static class DatapackItemEntry extends Entry {
+            private final Identifier identifier;
+
+            public DatapackItemEntry(Identifier identifier) {this.identifier = identifier; }
+
+            public Identifier getIdentifier() { return identifier; }
+
+            @Override
+            public EntryType getType() {
+                return new EntryType(CODEC);
+            }
+
+            public static final Codec<DatapackItemEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    Identifier.CODEC.fieldOf("id").forGetter(DatapackItemEntry::getIdentifier)
+            ).apply(instance, DatapackItemEntry::new));
+
+            @Override
+            public Collection<ItemStack> getCollection(World world) {
+                return List.of(((DatapackItemUtils.DatapackItemHandler)world).smithed$getDatapackItem(identifier));
+            }
         }
 
         public static class EntryType {
