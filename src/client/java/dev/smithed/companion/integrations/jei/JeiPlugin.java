@@ -7,7 +7,6 @@ import dev.smithed.companion.utils.RegistryUtils;
 import dev.smithed.companion.registry.RecipeCategory;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
@@ -16,7 +15,6 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -94,7 +92,7 @@ public class JeiPlugin implements IModPlugin {
             final DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
 
             if(item == null) {
-                LOGGER.warn("Failed to load icon " + recipeCategory.icon());
+                LOGGER.warn("Failed to load recipe " + id + " icon " + recipeCategory.icon());
                 return;
             }
 
@@ -161,5 +159,4 @@ public class JeiPlugin implements IModPlugin {
             }
         }
     }
-
 }

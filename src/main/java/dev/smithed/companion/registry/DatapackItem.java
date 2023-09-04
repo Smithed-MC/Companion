@@ -42,7 +42,6 @@ public class DatapackItem {
      * the first time stack() is called seems to work, but may create problems in rare cases.
      */
     public DatapackItem(ItemStack stack, Identifier id) {
-        System.out.println("Flag Processing DatapackItem");
         this.id = id;
         if(stack != ItemStack.EMPTY) {
             this.stack = stack;
