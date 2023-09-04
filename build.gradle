@@ -85,16 +85,16 @@ dependencies {
 
 	// JEI
 	modCompileOnly("mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}") { transitive = false }
-	modLocalRuntime("mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}") { transitive = false }
+	//modCompileOnly("mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}") { transitive = false }
 
 	// EMI
-	//modCompileOnly "dev.emi:emi-fabric:${project.emi_version}:api"
-	//modLocalRuntime "dev.emi:emi-fabric:${project.emi_version}"
+	modCompileOnly "dev.emi:emi-fabric:${project.emi_version}:api"
+	//modCompileOnly "dev.emi:emi-fabric:${project.emi_version}"
 
 	// REI
-	//modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
-	//modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}"
-	//modLocalRuntime "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
+	modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:${project.rei_version}"
+	//modCompileOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
 }
 
 processResources {

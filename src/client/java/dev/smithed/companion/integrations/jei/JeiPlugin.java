@@ -1,6 +1,7 @@
 package dev.smithed.companion.integrations.jei;
 
 import dev.smithed.companion.SmithedMain;
+import dev.smithed.companion.integrations.TextureLocations;
 import dev.smithed.companion.registry.ComRecipe;
 import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.utils.RegistryUtils;
@@ -90,21 +91,19 @@ public class JeiPlugin implements IModPlugin {
         RECIPETYPES.clear();
         final IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
 
-        final Identifier chestLocation = new Identifier(Identifier.DEFAULT_NAMESPACE, "textures/gui/container/shulker_box.png");
-        final IDrawableStatic chest = guiHelper.drawableBuilder(chestLocation, 6, 16, 164, 56).build();
-        final Identifier dispenserLocation = new Identifier(Identifier.DEFAULT_NAMESPACE, "textures/gui/container/dispenser.png");
-        final IDrawableStatic dispenser = guiHelper.drawableBuilder(dispenserLocation, 6, 16, 164, 56).build();
-        final Identifier hopperLocation = new Identifier(Identifier.DEFAULT_NAMESPACE, "textures/gui/container/hopper.png");
-        final IDrawableStatic hopper = guiHelper.drawableBuilder(hopperLocation, 6, 16, 164, 24).build();
+        final IDrawableStatic chest = guiHelper.drawableBuilder(TextureLocations.CHEST, 6, 16, 164, 56).build();
+        final IDrawableStatic dispenser = guiHelper.drawableBuilder(TextureLocations.DISPENSER, 6, 16, 164, 56).build();
+        final IDrawableStatic hopper = guiHelper.drawableBuilder(TextureLocations.HOPPER, 6, 16, 164, 24).build();
 
         final Registry<RecipeCategory> registry = world.getRegistryManager().get(RegistryUtils.RECIPE_CATEGORY);
+        final Registry<DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
         registry.getIds().forEach(id -> {
             final RecipeCategory recipeCategory = registry.get(id);
             if(recipeCategory == null) return;
             final RecipeType<CraftingRecipe> recipeType = RecipeType.create(id.getNamespace(), id.getPath(), CraftingRecipe.class);
-            final DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
+            final ItemStack item = recipeCategory.icon().getItemStack(itemRegistry);
 
-            if(item == null) {
+            if(item.getCount() == 0) {
                 LOGGER.warn("Failed to load smithed recipe category " + id + " icon " + recipeCategory.icon());
                 return;
             }
@@ -115,19 +114,19 @@ public class JeiPlugin implements IModPlugin {
                     IDrawable gui = chest;
                     if(recipeCategory.background().isPresent())
                         gui = new LayeredDrawable(gui, recipeCategory.background().get());
-                    category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
+                    category = new ChestSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item));
                 }
                 case "dispenser", "dropper" -> {
                     IDrawable gui = dispenser;
                     if(recipeCategory.background().isPresent())
                         gui = new LayeredDrawable(gui, recipeCategory.background().get());
-                    category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
+                    category = new DispenserSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item));
                 }
                 case "hopper" -> {
                     IDrawable gui = hopper;
                     if(recipeCategory.background().isPresent())
                         gui = new LayeredDrawable(gui, recipeCategory.background().get());
-                    category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item.stack()));
+                    category = new HopperSizeCategory<>(recipeType, recipeCategory.getDisplayText(), gui, guiHelper.createDrawableItemStack(item));
                 }
                 default -> {
                     LOGGER.warn("Invalid inventory type " + recipeCategory.inventoryType());
@@ -145,7 +144,7 @@ public class JeiPlugin implements IModPlugin {
         if(world == null)
             return;
 
-        final Map<String,List<CraftingRecipe>> recipes = new HashMap<>();
+        final Map<Identifier,List<CraftingRecipe>> recipes = new HashMap<>();
         final Registry<ComRecipe> registry = world.getRegistryManager().get(RegistryUtils.RECIPES);
         final Registry<DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
 
@@ -155,24 +154,24 @@ public class JeiPlugin implements IModPlugin {
             try {
                 int width = 9;
                 int height = 3;
-                if(recipe.category().equals("minecraft:crafting_table")) {
+                if(recipe.category().equals(new Identifier("minecraft:crafting_table"))) {
                     width = 3;
                 }
 
                 final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe, width*height);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
                 recipes.putIfAbsent(recipe.category(),new ArrayList<>());
-                recipes.get(recipe.category()).add(new ShapedRecipe(ID, ID.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output));
+                recipes.get(recipe.category()).add(new ShapedRecipe(id, id.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output));
             } catch(Exception e) {
                 LOGGER.warn("Failed to parse smithed recipe " + id + "." + e.getLocalizedMessage());
             }
         });
 
-        for(Map.Entry<String,List<CraftingRecipe>> entry: recipes.entrySet()) {
-            if(RECIPETYPES.containsKey(new Identifier(entry.getKey()))) {
-                final RecipeType<CraftingRecipe> type = RECIPETYPES.get(new Identifier(entry.getKey()));
+        for(Map.Entry<Identifier,List<CraftingRecipe>> entry: recipes.entrySet()) {
+            if(RECIPETYPES.containsKey(entry.getKey())) {
+                final RecipeType<CraftingRecipe> type = RECIPETYPES.get(entry.getKey());
                 registration.addRecipes(type, entry.getValue());
-            } else if(entry.getKey().equals("minecraft:crafting_table")) {
+            } else if(entry.getKey().equals(new Identifier("minecraft:crafting_table"))) {
                 registration.addRecipes(RecipeTypes.CRAFTING, entry.getValue());
             } else {
                 LOGGER.warn("Missing smithed recipe category " + entry.getKey());

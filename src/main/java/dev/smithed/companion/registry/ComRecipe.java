@@ -6,19 +6,20 @@ import dev.smithed.companion.container.ItemContainer;
 import io.netty.handler.codec.CodecException;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 import java.util.List;
 import java.util.Map;
 
-public record ComRecipe(List<String> pattern, Map<String,ItemContainer> keys, ItemContainer result, String category) {
+public record ComRecipe(List<String> pattern, Map<String,ItemContainer> keys, ItemContainer result, Identifier category) {
 
     public static final Codec<ComRecipe> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     Codec.STRING.listOf().fieldOf("pattern").forGetter(ComRecipe::pattern),
                     Codec.unboundedMap(Codec.STRING, ItemContainer.CODEC).fieldOf("key").forGetter(ComRecipe::keys),
                     ItemContainer.CODEC.fieldOf("result").forGetter(ComRecipe::result),
-                    Codec.STRING.fieldOf("category").forGetter(ComRecipe::category)
+                    Identifier.CODEC.fieldOf("category").forGetter(ComRecipe::category)
             ).apply(instance, ComRecipe::new)
     );
 

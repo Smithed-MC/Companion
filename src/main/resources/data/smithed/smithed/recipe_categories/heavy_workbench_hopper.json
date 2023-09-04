@@ -1,6 +1,6 @@
 {
-  "display": "Heavy Workbench",
-  "inventory": "chest",
+  "display": "Heavy Workbench Hopper",
+  "inventory": "hopper",
   "item_icon": {
     "type" : "smithed:datapack_item_entry",
     "id" : "smithed:super_tnt"
