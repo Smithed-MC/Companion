@@ -25,10 +25,17 @@ public class ItemContainer {
 
     private ItemContainer(String type, Identifier id, ItemStack itemStack) {
         final boolean isIdEmpty = id.getPath().equals("");
-        if(type.equals("smithed:item_entry") && isIdEmpty && itemStack == ItemStack.EMPTY)
-            throw new CodecException("smithed:item_entry requires an 'id' field or an 'item' field");
-        if(type.equals("smithed:datapack_item_entry") && isIdEmpty)
-            throw new CodecException("smithed:datapack_item_entry requires an 'id' field");
+        switch (type) {
+            case "smithed:item_entry" -> {
+                if(isIdEmpty && itemStack == ItemStack.EMPTY)
+                    throw new CodecException("smithed:item_entry requires an 'id' field or an 'item' field");
+            }
+            case "smithed:datapack_item_entry" -> {
+                if(isIdEmpty)
+                    throw new CodecException("smithed:datapack_item_entry requires an 'id' field");
+            }
+            default -> throw new CodecException("Invalid type " + type + ", expected 'smithed:datapack_item_entry' or 'smithed:item_entry'");
+        }
 
         this.type = type;
         this.id = id;
@@ -60,8 +67,10 @@ public class ItemContainer {
                 final DatapackItem item = registry.get(this.id);
                 if(item != null)
                     return item.stack();
+                else
+                    throw new CodecException("Unknown DatapackItem " + id);
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override

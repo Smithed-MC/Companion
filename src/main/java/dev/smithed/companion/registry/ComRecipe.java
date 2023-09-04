@@ -3,6 +3,7 @@ package dev.smithed.companion.registry;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.smithed.companion.container.ItemContainer;
+import io.netty.handler.codec.CodecException;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.collection.DefaultedList;
@@ -21,14 +22,19 @@ public record ComRecipe(List<String> pattern, Map<String,ItemContainer> keys, It
             ).apply(instance, ComRecipe::new)
     );
 
-    public static DefaultedList<Ingredient> computeRecipe(Registry<DatapackItem> registry, ComRecipe recipe) {
-        final DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(27, Ingredient.empty());
+    public static DefaultedList<Ingredient> computeRecipe(Registry<DatapackItem> registry, ComRecipe recipe, int size) {
+        final DefaultedList<Ingredient> ingredients = DefaultedList.ofSize(size, Ingredient.empty());
 
         int offset = 0;
         for(String line: recipe.pattern()) {
             for(int i = 0; i < line.length(); i++) {
-                if(line.charAt(i) != ' ')
-                    ingredients.set(offset + i, Ingredient.ofStacks(recipe.keys().get(line.substring(i,i+1)).getItemStack(registry)));
+                if(line.charAt(i) != ' ') {
+                    final String key = line.substring(i, i + 1);
+                    if(recipe.keys.containsKey(key))
+                        ingredients.set(offset + i, Ingredient.ofStacks(recipe.keys().get(key).getItemStack(registry)));
+                    else
+                        throw new CodecException("Missing recipe key " + key);
+                }
             }
             offset += line.length();
         }

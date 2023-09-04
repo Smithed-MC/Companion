@@ -52,4 +52,6 @@ public abstract class DynamicCategory<T extends Recipe<?>> implements IRecipeCat
         return icon;
     }
 
+    public abstract int[] getSize();
+
 }

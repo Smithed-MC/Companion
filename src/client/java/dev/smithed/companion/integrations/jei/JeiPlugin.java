@@ -6,20 +6,24 @@ import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.utils.RegistryUtils;
 import dev.smithed.companion.registry.RecipeCategory;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
+import mezz.jei.library.load.registration.SubtypeRegistration;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.ShapedRecipe;
@@ -66,6 +70,13 @@ public class JeiPlugin implements IModPlugin {
             SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), id.toString());
         });
         for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
+            if(registration instanceof SubtypeRegistration subtype) {
+                Optional<IIngredientSubtypeInterpreter<ItemStack>> interpreter = subtype.getInterpreters().get(VanillaTypes.ITEM_STACK, new ItemStack(entry.getKey()));
+                if(interpreter.isPresent()) {
+                    LOGGER.warn("Failed to register subtype for " + entry.getKey() + ". JEI probably registers its own subtype for this item.");
+                    return;
+                }
+            }
             registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
         }
     }
@@ -94,7 +105,7 @@ public class JeiPlugin implements IModPlugin {
             final DatapackItem item = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY).get(recipeCategory.icon());
 
             if(item == null) {
-                LOGGER.warn("Failed to load icon " + recipeCategory.icon());
+                LOGGER.warn("Failed to load smithed recipe category " + id + " icon " + recipeCategory.icon());
                 return;
             }
 
@@ -142,13 +153,18 @@ public class JeiPlugin implements IModPlugin {
             final ComRecipe recipe = registry.get(id);
             if(recipe == null) return;
             try {
-                final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe);
+                int width = 9;
+                int height = 3;
+                if(recipe.category().equals("minecraft:crafting_table")) {
+                    width = 3;
+                }
+
+                final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe, width*height);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
                 recipes.putIfAbsent(recipe.category(),new ArrayList<>());
-                recipes.get(recipe.category()).add(new ShapedRecipe(ID, "misc", CraftingRecipeCategory.MISC, 27, 3, ingredients, output));
+                recipes.get(recipe.category()).add(new ShapedRecipe(ID, ID.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output));
             } catch(Exception e) {
-                LOGGER.warn("Failed to parse smithed recipe " + id);
-                LOGGER.warn(String.valueOf(e));
+                LOGGER.warn("Failed to parse smithed recipe " + id + "." + e.getLocalizedMessage());
             }
         });
 
@@ -156,10 +172,25 @@ public class JeiPlugin implements IModPlugin {
             if(RECIPETYPES.containsKey(new Identifier(entry.getKey()))) {
                 final RecipeType<CraftingRecipe> type = RECIPETYPES.get(new Identifier(entry.getKey()));
                 registration.addRecipes(type, entry.getValue());
+            } else if(entry.getKey().equals("minecraft:crafting_table")) {
+                registration.addRecipes(RecipeTypes.CRAFTING, entry.getValue());
             } else {
-                LOGGER.warn("Missing recipe category " + entry.getKey());
+                LOGGER.warn("Missing smithed recipe category " + entry.getKey());
             }
         }
     }
 
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        final ClientWorld world = MinecraftClient.getInstance().world;
+        if(world == null)
+            return;
+
+        final List<CraftingRecipe> recipes = new ArrayList<>();
+        jeiRuntime.getRecipeManager().createRecipeLookup(RecipeTypes.CRAFTING).get().forEach(recipe -> {
+            if(recipe.getOutput(world.getRegistryManager()).getItem() == Items.KNOWLEDGE_BOOK)
+                recipes.add(recipe);
+        });
+        jeiRuntime.getRecipeManager().hideRecipes(RecipeTypes.CRAFTING, recipes);
+    }
 }
