@@ -10,6 +10,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.recipe.CraftingRecipe;
 
+/**
+ * Implements EMI's recipes. Handles ingredients & rending the background.
+ */
 public abstract class EmiRecipeExtender extends BasicEmiRecipe {
 
     private final BackgroundContainer background;
@@ -30,11 +33,6 @@ public abstract class EmiRecipeExtender extends BasicEmiRecipe {
         if(background != null) {
             widgets.addTexture(background.icon(), 0, 0, background.width(), background.height(), background.u(), background.v());
         }
-    }
-
-    @Override
-    public boolean supportsRecipeTree() {
-        return false;
     }
 
 }

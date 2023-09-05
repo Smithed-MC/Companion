@@ -8,6 +8,10 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.book.CookingRecipeCategory;
 import net.minecraft.util.Identifier;
 
+/**
+ * Implements MC's 'cooking recipe' for use with EMI.
+ * Normally this is for the serializer, but that isn't needed and simply return null;
+ */
 public class SmeltingRecipeExtender extends AbstractCookingRecipe {
 
     public SmeltingRecipeExtender(RecipeType<?> type, Identifier id, String group, CookingRecipeCategory category, Ingredient input, ItemStack output, float experience, int cookTime) {
@@ -15,7 +19,7 @@ public class SmeltingRecipeExtender extends AbstractCookingRecipe {
     }
 
     public SmeltingRecipeExtender(RecipeType<?> type, Identifier id, CookingRecipeCategory category, Ingredient input, ItemStack output) {
-        this(type, id, id.toString(), category, input, output, 0, 10);
+        this(type, id, id.toString(), category, input, output, 0, 200);
     }
 
     @Override

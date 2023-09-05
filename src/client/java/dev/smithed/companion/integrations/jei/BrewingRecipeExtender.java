@@ -9,6 +9,11 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Barebones implementation of JEI's BrewingRecipeUtil. This is normally used by JEI to track combined
+ * recipe trees (ie. nether wart -> blaze powder -> redstone -> gunpowder), but isn't needed here.
+ * This class does just enough to not crash the game.
+ */
 public class BrewingRecipeExtender extends BrewingRecipeUtil {
 
     public BrewingRecipeExtender(Identifier id, ItemStack stack) {
