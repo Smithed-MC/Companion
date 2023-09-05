@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("ALL")
 /**
  * Creates a datapack item bound registry, which serves to act as a stand-in for datapack items and their associated data
  * @author dragoncommands, ImCoolYeah105
@@ -72,18 +73,5 @@ public class DatapackItem {
 
     private Identifier id() {
         return new Identifier("");
-    }
-
-    /**
-     * General interface to handle smithed datapack items in world
-     */
-    public interface DatapackItemHandler {
-
-        ItemStack smithed$getDatapackItem(Identifier identifier);
-
-        void smithed$registerItem(DatapackItem item);
-
-        void smithed$dumpItems();
-
     }
 }
