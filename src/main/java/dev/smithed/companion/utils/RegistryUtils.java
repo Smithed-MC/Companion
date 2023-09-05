@@ -2,6 +2,7 @@ package dev.smithed.companion.utils;
 
 import dev.smithed.companion.registry.ComRecipe;
 import dev.smithed.companion.registry.DatapackItem;
+import dev.smithed.companion.registry.ItemGroupData;
 import dev.smithed.companion.registry.RecipeCategory;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.registry.Registry;

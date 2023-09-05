@@ -19,14 +19,14 @@ public class SmithedMain implements ModInitializer {
 		ServerEventUtils.registerAll();
 	}
 
-	/*
-	Creates a Logger for the given name. Exists to split off different utilities into their own thing.
+	/**
+	 * Creates a Logger for the given name. Exists to split off different utilities into their own thing.
 	 */
 	public static Logger createLogger(String logger) {
 		return LoggerFactory.getLogger(MODID + "-" + logger);
 	}
-	/*
-	Returns a Smithed Identifier, merely a shortcut for things requiring it.
+	/**
+	 * Returns a Smithed Identifier, merely a shortcut for things requiring it.
 	 */
 	public static Identifier modID(String path) {
 		return new Identifier(MODID, path);
