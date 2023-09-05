@@ -32,4 +32,9 @@ public abstract class EmiRecipeExtender extends BasicEmiRecipe {
         }
     }
 
+    @Override
+    public boolean supportsRecipeTree() {
+        return false;
+    }
+
 }

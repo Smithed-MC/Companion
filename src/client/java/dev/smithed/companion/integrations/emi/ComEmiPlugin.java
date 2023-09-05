@@ -2,12 +2,15 @@ package dev.smithed.companion.integrations.emi;
 
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
-import dev.emi.emi.api.recipe.EmiCraftingRecipe;
-import dev.emi.emi.api.recipe.EmiRecipe;
-import dev.emi.emi.api.recipe.EmiRecipeCategory;
+import dev.emi.emi.api.recipe.*;
 import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
+import dev.emi.emi.api.widget.WidgetHolder;
+import dev.emi.emi.recipe.EmiBrewingRecipe;
+import dev.emi.emi.recipe.EmiCookingRecipe;
+import dev.emi.emi.recipe.EmiFuelRecipe;
+import dev.emi.emi.recipe.EmiSmithingRecipe;
 import dev.smithed.companion.container.BackgroundContainer;
 import dev.smithed.companion.registry.ComRecipe;
 import dev.smithed.companion.registry.DatapackItem;
@@ -15,16 +18,15 @@ import dev.smithed.companion.registry.RecipeCategory;
 import dev.smithed.companion.utils.RegistryUtils;
 import io.netty.handler.codec.CodecException;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.*;
+import net.minecraft.recipe.book.CookingRecipeCategory;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.Registry;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Language;
 import net.minecraft.util.collection.DefaultedList;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,9 @@ public class ComEmiPlugin implements EmiPlugin {
         registerRecipes(registry);
     }
 
+    /**
+     * Grabs all smithed recipe categories from datapacks and registers them with EMI
+     */
     private void registerCategories(EmiRegistry emiRegistry) {
         // Grab registries
         final ClientWorld world = MinecraftClient.getInstance().world;
@@ -76,9 +81,20 @@ public class ComEmiPlugin implements EmiPlugin {
             emiRegistry.addWorkstation(category, workstation);
         });
 
+        RECIPECATEGORIES.put(new Identifier("minecraft:crafting_table"), VanillaEmiRecipeCategories.CRAFTING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:furnace"), VanillaEmiRecipeCategories.SMELTING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:blast_furnace"), VanillaEmiRecipeCategories.BLASTING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:smoker"), VanillaEmiRecipeCategories.SMOKING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:brewing_stand"), VanillaEmiRecipeCategories.BREWING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:smithing_table"), VanillaEmiRecipeCategories.SMITHING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:campfire"), VanillaEmiRecipeCategories.CAMPFIRE_COOKING);
     }
 
+    /**
+     * Grabs all smithed recipes from datapacks and registers them with EMI
+     */
     private void registerRecipes(EmiRegistry emiRegistry) {
+        // Grab registries
         final ClientWorld world = MinecraftClient.getInstance().world;
         if(world == null)
             return;
@@ -87,59 +103,70 @@ public class ComEmiPlugin implements EmiPlugin {
         final Registry<DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
         final Registry<RecipeCategory> categoryRegistry = world.getRegistryManager().get(RegistryUtils.RECIPE_CATEGORY);
 
+        // Register each recipe with EMI
         recipeRegistry.getIds().forEach(id -> {
             final ComRecipe recipe = recipeRegistry.get(id);
             if (recipe == null) return;
 
-            if(!RECIPECATEGORIES.containsKey(recipe.category()) && !recipe.category().equals(new Identifier("minecraft:crafting_table"))) {
+            // Get recipe category associated with recipe
+            if(!RECIPECATEGORIES.containsKey(recipe.category())) {
                 LOGGER.warn("Missing smithed recipe category " + recipe.category());
                 return;
             }
 
             final RecipeCategory recipeCategory = categoryRegistry.get(recipe.category());
+            final EmiRecipeCategory emiCategory =  RECIPECATEGORIES.get(recipe.category());
 
             String invType;
             if(recipeCategory != null)
                 invType = recipeCategory.inventoryType();
             else
-                invType = "crafting_table";
+                invType = recipe.category().toString();
 
             try {
+                // Store recipe width & height
                 int width;
                 int height;
-
                 switch (invType) {
                     case "chest", "barrel", "shulker_box" -> { width = 9; height = 3; }
-                    case "dispenser", "dropper", "crafting_table" -> { width = 3; height = 3; }
+                    case "dispenser", "dropper", "minecraft:crafting_table" -> { width = 3; height = 3; }
                     case "hopper" -> { width = 5; height = 1; }
+                    case "minecraft:smithing_table" -> { width = 3; height = 1; }
+                    case "minecraft:brewing_stand" -> { width = 2; height = 1; }
+                    case "minecraft:furnace", "minecraft:blast_furnace", "minecraft:smoker", "minecraft:campfire" -> { width = 1; height = 1; }
                     default -> throw new CodecException("Unknown category type.");
                 }
 
+                // Get recipe items
                 final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe, width*height);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
                 final CraftingRecipe craftingRecipe = new ShapedRecipe(id, id.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output);
 
+                final List<EmiIngredient> emiIngredients = new ArrayList<>();
+                ingredients.forEach(ingredient -> emiIngredients.add(EmiIngredient.of(ingredient)));
+
+                // Add background if present
                 BackgroundContainer background = null;
                 if(recipeCategory != null && recipeCategory.background().isPresent())
                     background = recipeCategory.background().get();
 
+                // Create Recipe based on type
                 EmiRecipe recipeOut;
                 switch (invType) {
-                    case "chest", "barrel", "shulker_box" ->
-                            recipeOut = new ChestRecipe(background, RECIPECATEGORIES.get(recipe.category()), craftingRecipe);
-                    case "dispenser", "dropper" ->
-                            recipeOut = new DispenserRecipe(background, RECIPECATEGORIES.get(recipe.category()), craftingRecipe);
-                    case "hopper" ->
-                            recipeOut = new HopperRecipe(background, RECIPECATEGORIES.get(recipe.category()), craftingRecipe);
-                    case "crafting_table" -> {
-                        final List<EmiIngredient> input = new ArrayList<>();
-                        ingredients.forEach(ingredient -> input.add(EmiIngredient.of(ingredient)));
-                        recipeOut = new EmiCraftingRecipe(input, EmiStack.of(output), id, false);
-                    }
+                    case "chest", "barrel", "shulker_box" -> recipeOut = new ChestRecipe(background, emiCategory, craftingRecipe);
+                    case "dispenser", "dropper" -> recipeOut = new DispenserRecipe(background, emiCategory, craftingRecipe);
+                    case "hopper" -> recipeOut = new HopperRecipe(background, emiCategory, craftingRecipe);
+                    case "minecraft:crafting_table" -> recipeOut = new EmiCraftingRecipe(emiIngredients, EmiStack.of(output), id, false);
+                    case "minecraft:brewing_stand" -> recipeOut = new EmiBrewingRecipe(emiIngredients.get(0).getEmiStacks().get(0), emiIngredients.get(1), EmiStack.of(output), id);
+                    case "minecraft:furnace" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.SMELTING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:blast_furnace" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.BLASTING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:smoker" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.SMOKING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:campfire" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.CAMPFIRE_COOKING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:smithing_table" -> recipeOut = new EmiSmithingRecipe(emiIngredients.get(0), emiIngredients.get(1), emiIngredients.get(2), EmiStack.of(output), id);
                     default -> recipeOut = null;
                 }
-                if(recipeOut != null)
-                    emiRegistry.addRecipe(recipeOut);
+                // Register with EMI
+                emiRegistry.addRecipe(recipeOut);
             } catch(Exception e) {
                 LOGGER.warn("Failed to parse smithed recipe " + id + "." + e.getLocalizedMessage());
             }
