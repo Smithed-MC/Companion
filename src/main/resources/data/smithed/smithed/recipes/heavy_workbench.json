@@ -1,0 +1,26 @@
+{
+  "pattern": [
+    "LLL",
+    "LCL",
+    "SSS"
+  ],
+  "key": {
+    "L": {
+      "type" : "smithed:item_entry",
+      "id": "minecraft:oak_log"
+    },
+    "C": {
+      "type" : "smithed:item_entry",
+      "id": "minecraft:crafting_table"
+    },
+    "S": {
+      "type" : "smithed:item_entry",
+      "id": "minecraft:smooth_stone"
+    }
+  },
+  "result": {
+    "type" : "smithed:datapack_item_entry",
+    "id" : "smithed:super_tnt"
+  },
+  "category": "minecraft:crafting_table"
+}

@@ -28,6 +28,9 @@
 		],
 		"jei_mod_plugin": [
 			"dev.smithed.companion.integrations.jei.JeiPlugin"
+		],
+		"emi": [
+			"dev.smithed.companion.integrations.emi.ComEmiPlugin"
 		]
 	},
 	"mixins": [

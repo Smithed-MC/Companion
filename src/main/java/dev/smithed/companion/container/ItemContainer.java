@@ -10,6 +10,10 @@ import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Generalized container for holding a DatapackItem, or an ItemStack.
+ * Primarily used as a Codec to load data from a datapack.
+ */
 public class ItemContainer {
 
     private final String type;
@@ -23,22 +27,34 @@ public class ItemContainer {
                 ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ItemContainer::getItemStack)
         ).apply(instance, ItemContainer::new));
 
+    /**
+     * Init container if type 'item_entry' and an ID or ItemStack is present,
+     * or if type 'datapack_item_entry' and an ID is present. Fail otherwise.
+     * @param type String type, must be 'smithed:item_entry' or 'smithed:datapack_item_entry'
+     * @param id ID of item for 'item_entry', where it is converted to an ItemStack. ID of DatapackItem for 'datapack_item_entry'
+     * @param itemStack If type is 'item_entry,' and ID is ommited, ItemStack is the item to return from this container
+     */
     private ItemContainer(String type, Identifier id, ItemStack itemStack) {
         final boolean isIdEmpty = id.getPath().equals("");
         switch (type) {
+            // Fail if 'item_entry' and ID & itemStack are omitted
             case "smithed:item_entry" -> {
                 if(isIdEmpty && itemStack == ItemStack.EMPTY)
                     throw new CodecException("smithed:item_entry requires an 'id' field or an 'item' field");
             }
+            // Fail it 'datapack_item_entry' and ID is omitted
             case "smithed:datapack_item_entry" -> {
                 if(isIdEmpty)
                     throw new CodecException("smithed:datapack_item_entry requires an 'id' field");
             }
+            // Fail if type is invalid
             default -> throw new CodecException("Invalid type " + type + ", expected 'smithed:datapack_item_entry' or 'smithed:item_entry'");
         }
 
         this.type = type;
         this.id = id;
+        // If no ID, save raw itemStack. Otherwise, convert item ID to an ItemStack
+        // ItemStack is air if item is 'invalid,' ie. is a DatapackItem
         if(isIdEmpty)
             this.itemStack = itemStack;
         else
@@ -59,6 +75,13 @@ public class ItemContainer {
         return itemStack;
     }
 
+    /**
+     * Returns ItemStack this container holds. Returns ItemStack.EMPTY if itemStack doesn't exist (ie. DatapackItem
+     * isn't registered).
+     * Verify is actually returned using itemStack.count() > 0
+     * @param registry Current registry of DatapackItems, for retrieval if needed.
+     * @return ItemStack this class represents, or ItemStack.EMPTY if the stack doesn't exist.
+     */
     public ItemStack getItemStack(Registry<DatapackItem> registry) {
         if(type.equals("smithed:item_entry")) {
             return this.itemStack;
