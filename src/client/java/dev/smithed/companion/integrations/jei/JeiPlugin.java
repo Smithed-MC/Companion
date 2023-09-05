@@ -186,7 +186,7 @@ public class JeiPlugin implements IModPlugin {
                     width = 3;
                 }
 
-                final DefaultedList<Ingredient> ingredients = ComRecipe.computeRecipe(itemRegistry, recipe, width*height);
+                final DefaultedList<Ingredient> ingredients = recipe.computeRecipe(itemRegistry, width*height);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
 
                 switch (recipe.category().toString()) {

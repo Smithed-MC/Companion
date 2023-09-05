@@ -8,6 +8,16 @@ import net.minecraft.text.Text;
 
 import java.util.Optional;
 
+/**
+ * Custom category for grouping smithed recipes into.
+ * @param display Name of category
+ * @param icon Item to render as the category, usually the workbench (ie. Crafting Table)
+ * @param inventoryType Type of inventory to use for recipes, must be:
+ *                      * chest, barrel, shulker_box (3x9)
+ *                      * dispenser, dropper (3x3)
+ *                      * hopper (1x5)
+ * @param background Optional background overlay, if your workstation has a custom GUI.
+ */
 public record RecipeCategory(String display, ItemContainer icon, String inventoryType, Optional<BackgroundContainer> background) {
 
     public static final Codec<RecipeCategory> CODEC = RecordCodecBuilder.create(instance ->

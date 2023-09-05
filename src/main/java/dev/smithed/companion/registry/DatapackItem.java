@@ -33,9 +33,14 @@ public class DatapackItem {
             ).apply(instance, DatapackItem::new)
     );
 
-    /*
-     * Note: server does not start in time for loot tables to be process on initialization. Delaying resoloution until
+    /**
+     * DatapackItem constructor. Takes an ItemStack, or a loot table Identifier.
+     *
+     * Note: server does not start in time for loot tables to be process on initialization. Delaying resolution until
      * the first time stack() is called seems to work, but may create problems in rare cases.
+     *
+     * @param stack ItemStack this DatapackItem represents
+     * @param id Identifier of the loot table to grab the ItemStack from. Must drop exactly 1 item.
      */
     public DatapackItem(ItemStack stack, Identifier id) {
         this.id = id;
@@ -48,6 +53,12 @@ public class DatapackItem {
         }
     }
 
+    /**
+     * Attempts to resolve the loot table of this DatapackItem.
+     * Must happen after loot tables have been initialized.
+     * Loot table must drop exactly 1 item to succeed.
+     * @return ItemStack dropped by Loot table
+     */
     private ItemStack resolveLootTable() {
         try {
             final MinecraftServer server = ServerEventUtils.getCurrentServer();
@@ -64,12 +75,22 @@ public class DatapackItem {
         }
     }
 
+    /**
+     * Grabs ItemStack the DatapackItem represents.
+     * Attempts to resolve the loot table on first call, if needed.
+     * @return ItemStack this item represents. Returns ItemStack.EMPTY if the loot table resolution failed.
+     */
     public ItemStack stack() {
         if (this.stack == null)
             this.stack = resolveLootTable();
         return stack;
     }
 
+    /**
+     * Codec requires a getter for serializing this class (sending to the client).
+     * However, only the ItemStack is needed at this point, so an empty Identifier is sent instead.
+     * @return Empty Identifier
+     */
     private Identifier id() {
         return new Identifier("");
     }
