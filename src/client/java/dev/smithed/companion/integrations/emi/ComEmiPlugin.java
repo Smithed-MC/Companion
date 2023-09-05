@@ -18,6 +18,7 @@ import io.netty.handler.codec.CodecException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.book.CookingRecipeCategory;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Registers datapack items, recipe categories, and recipes to EMI if it is loaded
@@ -48,6 +50,9 @@ public class ComEmiPlugin implements EmiPlugin {
     public void register(EmiRegistry registry) {
         registerCategories(registry);
         registerRecipes(registry);
+
+        // Remove knowledge book crafting recipes
+        registry.removeRecipes(emiRecipe -> emiRecipe.getOutputs().contains(EmiStack.of(new ItemStack(Items.KNOWLEDGE_BOOK))));
     }
 
     /**
