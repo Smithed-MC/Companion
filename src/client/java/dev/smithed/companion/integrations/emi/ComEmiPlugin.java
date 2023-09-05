@@ -6,10 +6,8 @@ import dev.emi.emi.api.recipe.*;
 import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.recipe.EmiBrewingRecipe;
 import dev.emi.emi.recipe.EmiCookingRecipe;
-import dev.emi.emi.recipe.EmiFuelRecipe;
 import dev.emi.emi.recipe.EmiSmithingRecipe;
 import dev.smithed.companion.container.BackgroundContainer;
 import dev.smithed.companion.registry.ComRecipe;
@@ -26,7 +24,6 @@ import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,13 +78,14 @@ public class ComEmiPlugin implements EmiPlugin {
             emiRegistry.addWorkstation(category, workstation);
         });
 
+        // Store vanilla categories
         RECIPECATEGORIES.put(new Identifier("minecraft:crafting_table"), VanillaEmiRecipeCategories.CRAFTING);
         RECIPECATEGORIES.put(new Identifier("minecraft:furnace"), VanillaEmiRecipeCategories.SMELTING);
         RECIPECATEGORIES.put(new Identifier("minecraft:blast_furnace"), VanillaEmiRecipeCategories.BLASTING);
         RECIPECATEGORIES.put(new Identifier("minecraft:smoker"), VanillaEmiRecipeCategories.SMOKING);
         RECIPECATEGORIES.put(new Identifier("minecraft:brewing_stand"), VanillaEmiRecipeCategories.BREWING);
-        RECIPECATEGORIES.put(new Identifier("minecraft:smithing_table"), VanillaEmiRecipeCategories.SMITHING);
         RECIPECATEGORIES.put(new Identifier("minecraft:campfire"), VanillaEmiRecipeCategories.CAMPFIRE_COOKING);
+        RECIPECATEGORIES.put(new Identifier("minecraft:smithing_table"), VanillaEmiRecipeCategories.SMITHING);
     }
 
     /**
