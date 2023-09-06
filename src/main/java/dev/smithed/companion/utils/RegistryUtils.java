@@ -1,5 +1,6 @@
 package dev.smithed.companion.utils;
 
+import com.mojang.serialization.Codec;
 import dev.smithed.companion.registry.ComRecipe;
 import dev.smithed.companion.registry.DatapackItem;
 import dev.smithed.companion.registry.ItemGroupData;
@@ -10,9 +11,17 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static dev.smithed.companion.SmithedMain.modID;
 
 public class RegistryUtils {
+
+    /**
+     * Set containing smithed specific registry keys.
+     */
+    public static final Set<RegistryKey<?>> SMITHED_REGISTRY_KEYS = new HashSet<>();
 
     /**
      * Smithed companion registry keys
@@ -34,11 +43,11 @@ public class RegistryUtils {
      * Registers dynamic registries like shortcuts, itemgroups etc...
      */
     private static void registerDynamicRegistries() {
-        DynamicRegistries.registerSynced(SHORTCUT_REGISTRY, ShortcutUtils.ShortcutData.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-        DynamicRegistries.registerSynced(ITEMGROUP_REGISTRY, ItemGroupData.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-        DynamicRegistries.registerSynced(DATAPACK_ITEM_REGISTRY, DatapackItem.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
-        DynamicRegistries.registerSynced(RECIPE_CATEGORY, RecipeCategory.CODEC);
-        DynamicRegistries.registerSynced(RECIPES, ComRecipe.CODEC);
+        registerSynced(SHORTCUT_REGISTRY, ShortcutUtils.ShortcutData.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
+        registerSynced(ITEMGROUP_REGISTRY, ItemGroupData.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
+        registerSynced(DATAPACK_ITEM_REGISTRY, DatapackItem.CODEC, DynamicRegistries.SyncOption.SKIP_WHEN_EMPTY);
+        registerSynced(RECIPE_CATEGORY, RecipeCategory.CODEC);
+        registerSynced(RECIPES, ComRecipe.CODEC);
     }
 
     /**
@@ -62,6 +71,18 @@ public class RegistryUtils {
     }
 
     /**
+     * Smithed standin for <code>DynamicRegistries.registerSynced();</code>
+     * @param key key to bind registry to
+     * @param codec codec for network communication
+     * @param options options for network syncing
+     * @param <T> typeof registry
+     */
+    private static <T> void registerSynced(RegistryKey<? extends Registry<T>> key, Codec<T> codec, DynamicRegistries.SyncOption... options) {
+        SMITHED_REGISTRY_KEYS.add(key);
+        DynamicRegistries.registerSynced(key, codec, codec, options);
+    }
+
+    /**
      * Simple helper interface for registry functions
      * @param <T> typeof registry, goes unused typically
      */
@@ -76,11 +97,14 @@ public class RegistryUtils {
      */
     //TODO implement this event completely
     @FunctionalInterface
-    public interface RegistryFinalizedEvent {
+    public interface RegistryFinalizedCallback {
+        /**
+         *
+         */
         void invoke();
 
-        Event<RegistryFinalizedEvent> EVENT = EventFactory.createArrayBacked(RegistryFinalizedEvent.class, listeners -> () -> {
-            for(RegistryFinalizedEvent listener : listeners) {
+        Event<RegistryFinalizedCallback> EVENT = EventFactory.createArrayBacked(RegistryFinalizedCallback.class, listeners -> () -> {
+            for(RegistryFinalizedCallback listener : listeners) {
                 listener.invoke();
             }
         });
