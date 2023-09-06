@@ -4,6 +4,10 @@ import dev.smithed.companion.container.BackgroundContainer;
 import mezz.jei.api.gui.drawable.IDrawable;
 import net.minecraft.client.gui.DrawContext;
 
+/**
+ * Draws a layered image of the starting background texture with
+ * the background container on top. Enables rendering custom UIs.
+ */
 public class LayeredDrawable implements IDrawable {
 
     private final IDrawable drawable;

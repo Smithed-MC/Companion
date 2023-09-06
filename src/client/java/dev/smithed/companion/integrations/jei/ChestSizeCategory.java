@@ -6,14 +6,10 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 public class ChestSizeCategory<T extends Recipe<?>> extends DynamicCategory<T> {
 
@@ -35,7 +31,4 @@ public class ChestSizeCategory<T extends Recipe<?>> extends DynamicCategory<T> {
         builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getOutput(world.getRegistryManager()));
     }
 
-    public int[] getSize() {
-        return new int[]{9,3};
-    }
 }

@@ -1,0 +1,24 @@
+{
+  "pattern": [
+    "SRG"
+  ],
+  "key": {
+    "S": {
+      "type" : "smithed:item_entry",
+      "id" : "minecraft:sand"
+    },
+    "R": {
+      "type" : "smithed:item_entry",
+      "id" : "minecraft:red_sand"
+    },
+    "G": {
+      "type" : "smithed:datapack_item_entry",
+      "id" : "smithed:super_gunpowder"
+    }
+  },
+  "result": {
+    "type" : "smithed:datapack_item_entry",
+    "id" : "smithed:super_tnt"
+  },
+  "category": "minecraft:smithing_table"
+}

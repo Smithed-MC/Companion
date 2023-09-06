@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Subtype container for JEI. Will map all provided NBTCompounds to a subtype.
+ */
 public class AllNbtSubtype implements IIngredientSubtypeInterpreter<ItemStack> {
 
     private final Map<NbtCompound, String> subtypes;
