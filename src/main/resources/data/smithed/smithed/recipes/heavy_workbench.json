@@ -20,7 +20,8 @@
   },
   "result": {
     "type" : "smithed:datapack_item_entry",
-    "id" : "smithed:super_tnt"
+    "id" : "smithed:super_tnt",
+    "count": 2
   },
   "category": "minecraft:crafting_table"
 }

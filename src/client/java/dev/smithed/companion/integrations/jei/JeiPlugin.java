@@ -23,6 +23,7 @@ import mezz.jei.library.load.registration.SubtypeRegistration;
 import mezz.jei.library.plugins.vanilla.brewing.JeiBrewingRecipe;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -54,7 +55,6 @@ public class JeiPlugin implements IModPlugin {
         return ID;
     }
 
-    private static final Map<Item,AllNbtSubtype> SUBTYPES = new HashMap<>();
     private static final Map<Identifier,RecipeType<CraftingRecipe>> RECIPETYPES = new HashMap<>();
 
     /**
@@ -70,28 +70,25 @@ public class JeiPlugin implements IModPlugin {
         if(world == null)
             return;
 
-        SUBTYPES.clear();
         final Registry<DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
+        final Set<Item> itemSet = new HashSet<>();
 
         // Collect all DatapackItems into a map of base_item:subtype
         registry.forEach(datapackItem -> {
-            final ItemStack item = datapackItem.stack();
-            SUBTYPES.putIfAbsent(item.getItem(), new AllNbtSubtype());
-            final Identifier id = registry.getId(datapackItem);
-            if(id == null) return;
-            SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), id.toString());
-        });
-        // Register map entries of base_item:subtype with JEI
-        for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
-            if(registration instanceof SubtypeRegistration subtype) {
-                Optional<IIngredientSubtypeInterpreter<ItemStack>> interpreter = subtype.getInterpreters().get(VanillaTypes.ITEM_STACK, new ItemStack(entry.getKey()));
-                if(interpreter.isPresent()) {
-                    LOGGER.warn("Failed to register subtype for " + entry.getKey() + ". JEI probably registers its own subtype for this item.");
-                    return;
+            final Item item = datapackItem.stack().getItem();
+            if(!itemSet.contains(item)) {
+                itemSet.add(item);
+                if(registration instanceof SubtypeRegistration subtype) {
+                    Optional<IIngredientSubtypeInterpreter<ItemStack>> interpreter = subtype.getInterpreters().get(VanillaTypes.ITEM_STACK, new ItemStack(item));
+                    if(interpreter.isPresent()) {
+                        LOGGER.warn("Failed to register subtype for " + item + ". JEI probably registers its own subtype for this item.");
+                        return;
+                    }
                 }
+                System.out.println("Registered subtype of " + item);
+                registration.useNbtForSubtypes(item);
             }
-            registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
-        }
+        });
     }
 
     /**

@@ -19,12 +19,14 @@ public class ItemContainer {
     private final String type;
     private final Identifier id;
     private final ItemStack itemStack;
+    private final int count;
 
     public static final Codec<ItemContainer> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                 Codec.STRING.fieldOf("type").forGetter(ItemContainer::getType),
                 Identifier.CODEC.optionalFieldOf("id", new Identifier("")).forGetter(ItemContainer::getId),
-                ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ItemContainer::getItemStack)
+                ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ItemContainer::getItemStack),
+                Codec.INT.optionalFieldOf("count", 1).forGetter(ItemContainer::getCount)
         ).apply(instance, ItemContainer::new));
 
     /**
@@ -34,7 +36,7 @@ public class ItemContainer {
      * @param id ID of item for 'item_entry', where it is converted to an ItemStack. ID of DatapackItem for 'datapack_item_entry'
      * @param itemStack If type is 'item_entry,' and ID is ommited, ItemStack is the item to return from this container
      */
-    private ItemContainer(String type, Identifier id, ItemStack itemStack) {
+    private ItemContainer(String type, Identifier id, ItemStack itemStack, int count) {
         final boolean isIdEmpty = id.getPath().equals("");
         switch (type) {
             // Fail if 'item_entry' and ID & itemStack are omitted
@@ -53,6 +55,7 @@ public class ItemContainer {
 
         this.type = type;
         this.id = id;
+        this.count = count;
         // If no ID, save raw itemStack. Otherwise, convert item ID to an ItemStack
         // ItemStack is air if item is 'invalid,' ie. is a DatapackItem
         if(isIdEmpty)
@@ -75,6 +78,10 @@ public class ItemContainer {
         return itemStack;
     }
 
+    private int getCount() {
+        return count;
+    }
+
     /**
      * Returns ItemStack this container holds. Returns ItemStack.EMPTY if itemStack doesn't exist (ie. DatapackItem
      * isn't registered).
@@ -84,12 +91,12 @@ public class ItemContainer {
      */
     public ItemStack getItemStack(Registry<DatapackItem> registry) {
         if(type.equals("smithed:item_entry")) {
-            return this.itemStack;
+            return this.itemStack.copyWithCount(this.count);
         }
         if(type.equals("smithed:datapack_item_entry")) {
                 final DatapackItem item = registry.get(this.id);
                 if(item != null)
-                    return item.stack();
+                    return item.stack().copyWithCount(this.count);
                 else
                     throw new CodecException("Unknown DatapackItem " + id);
         }
