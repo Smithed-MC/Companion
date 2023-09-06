@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- * JEI plugin loaders. Registers DatapackItems, smithed recipes, and smithed recipe categories.
+ * JEI plugin loader. Registers DatapackItems, smithed recipes, and smithed recipe categories.
  */
 @mezz.jei.api.JeiPlugin
 public class JeiPlugin implements IModPlugin {
@@ -171,7 +171,6 @@ public class JeiPlugin implements IModPlugin {
         if(world == null)
             return;
 
-        final Map<Identifier,List<CraftingRecipe>> recipes = new HashMap<>();
         final Registry<ComRecipe> registry = world.getRegistryManager().get(RegistryUtils.RECIPES);
         final Registry<DatapackItem> itemRegistry = world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
 

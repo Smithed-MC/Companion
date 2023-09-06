@@ -31,6 +31,9 @@
 		],
 		"emi": [
 			"dev.smithed.companion.integrations.emi.ComEmiPlugin"
+		],
+		"rei_client": [
+			"dev.smithed.companion.integrations.rei.ReiPlugin"
 		]
 	},
 	"mixins": [
