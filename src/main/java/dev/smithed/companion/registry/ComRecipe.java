@@ -51,10 +51,14 @@ public record ComRecipe(List<String> pattern, Map<String,ItemContainer> keys, It
             for(int i = 0; i < line.length(); i++) {
                 if(line.charAt(i) != ' ') {
                     final String key = line.substring(i, i + 1);
-                    if(this.keys.containsKey(key))
-                        ingredients.set(offset + i, Ingredient.ofStacks(this.keys().get(key).getItemStack(registry)));
-                    else
+                    if(this.keys.containsKey(key)) {
+                        if(this.keys.get(key).hasItemStackOverride())
+                            ingredients.set(offset + i, Ingredient.ofStacks(this.keys().get(key).getItemStackOverride(registry)));
+                        else
+                            ingredients.set(offset + i, Ingredient.ofStacks(this.keys().get(key).getItemStack(registry)));
+                    } else {
                         throw new CodecException("Missing recipe key " + key);
+                    }
                 }
             }
             offset += line.length();

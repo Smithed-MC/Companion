@@ -23,7 +23,6 @@ import mezz.jei.library.load.registration.SubtypeRegistration;
 import mezz.jei.library.plugins.vanilla.brewing.JeiBrewingRecipe;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -85,8 +84,7 @@ public class JeiPlugin implements IModPlugin {
                         return;
                     }
                 }
-                System.out.println("Registered subtype of " + item);
-                registration.useNbtForSubtypes(item);
+                registration.registerSubtypeInterpreter(item, new SubtypeExtender<>());
             }
         });
     }

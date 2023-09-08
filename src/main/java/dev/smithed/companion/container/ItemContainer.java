@@ -3,8 +3,10 @@ package dev.smithed.companion.container;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.smithed.companion.registry.DatapackItem;
+import dev.smithed.companion.utils.NBTUtils;
 import io.netty.handler.codec.CodecException;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -19,14 +21,16 @@ public class ItemContainer {
     private final String type;
     private final Identifier id;
     private final ItemStack itemStack;
-    private final int count;
+    private final NbtCompound itemStackOverride;
+    private final byte count;
 
     public static final Codec<ItemContainer> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                 Codec.STRING.fieldOf("type").forGetter(ItemContainer::getType),
                 Identifier.CODEC.optionalFieldOf("id", new Identifier("")).forGetter(ItemContainer::getId),
                 ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ItemContainer::getItemStack),
-                Codec.INT.optionalFieldOf("count", 1).forGetter(ItemContainer::getCount)
+                NbtCompound.CODEC.optionalFieldOf("item_override", new NbtCompound()).forGetter(ItemContainer::getItemStackOverride),
+                Codec.BYTE.optionalFieldOf("count", (byte) 1).forGetter(ItemContainer::getCount)
         ).apply(instance, ItemContainer::new));
 
     /**
@@ -36,7 +40,7 @@ public class ItemContainer {
      * @param id ID of item for 'item_entry', where it is converted to an ItemStack. ID of DatapackItem for 'datapack_item_entry'
      * @param itemStack If type is 'item_entry,' and ID is ommited, ItemStack is the item to return from this container
      */
-    private ItemContainer(String type, Identifier id, ItemStack itemStack, int count) {
+    private ItemContainer(String type, Identifier id, ItemStack itemStack, NbtCompound itemStackOverride, byte count) {
         final boolean isIdEmpty = id.getPath().equals("");
         switch (type) {
             // Fail if 'item_entry' and ID & itemStack are omitted
@@ -56,6 +60,7 @@ public class ItemContainer {
         this.type = type;
         this.id = id;
         this.count = count;
+        this.itemStackOverride = itemStackOverride;
         // If no ID, save raw itemStack. Otherwise, convert item ID to an ItemStack
         // ItemStack is air if item is 'invalid,' ie. is a DatapackItem
         if(isIdEmpty)
@@ -78,8 +83,12 @@ public class ItemContainer {
         return itemStack;
     }
 
-    private int getCount() {
+    private byte getCount() {
         return count;
+    }
+
+    private NbtCompound getItemStackOverride() {
+        return this.itemStackOverride;
     }
 
     /**
@@ -101,6 +110,25 @@ public class ItemContainer {
                     throw new CodecException("Unknown DatapackItem " + id);
         }
         return ItemStack.EMPTY;
+    }
+
+    public ItemStack getItemStackOverride(Registry<DatapackItem> registry) {
+        if(!hasItemStackOverride())
+            return this.getItemStack();
+        final ItemStack base = this.getItemStack(registry);
+        final ItemStack out = this.itemStackOverride.contains("id", NbtCompound.STRING_TYPE)
+                ? new ItemStack(Registries.ITEM.get(new Identifier(this.itemStackOverride.getString("id"))))
+                : base;
+        out.setCount(base.getCount());
+        if(base.getNbt() != null)
+            out.setNbt(base.getNbt().copyFrom(this.itemStackOverride.getCompound("tag")));
+        else
+            out.setNbt(this.itemStackOverride.getCompound("tag"));
+        return out;
+    }
+
+    public boolean hasItemStackOverride() {
+        return this.itemStackOverride.getSize() > 0 && this.itemStackOverride.contains("tag", NbtCompound.COMPOUND_TYPE);
     }
 
     @Override
