@@ -20,7 +20,7 @@ public class DispenserRecipe extends EmiRecipeExtender {
     public void addWidgets(WidgetHolder widgets) {
         int i = 0;
         for (EmiIngredient ingredient: inputs) {
-            widgets.addSlot(ingredient, 18 * (i%3) + 56, 18 * (i/3) + 1);
+            widgets.addSlot(ingredient, 18 * (i%3) + 55, 18 * (i/3) );
             i += 1;
         }
         widgets.addSlot(outputs.get(0), -16384, 0).recipeContext(this);

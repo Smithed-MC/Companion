@@ -72,7 +72,7 @@ public class JeiPlugin implements IModPlugin {
         final Registry<DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
         final Set<Item> itemSet = new HashSet<>();
 
-        // Collect all DatapackItems into a map of base_item:subtype
+        // Register subtype for each unique item instance
         registry.forEach(datapackItem -> {
             final Item item = datapackItem.stack().getItem();
             if(!itemSet.contains(item)) {
