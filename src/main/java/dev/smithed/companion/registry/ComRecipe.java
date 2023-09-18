@@ -60,17 +60,14 @@ public record ComRecipe(List<String> pattern, Map<String,ItemContainerKey> keys,
                         if(entry.isIngredientList()) {
                             final List<ItemStack> input = new ArrayList<>();
                             entry.ingredients().forEach(item -> {
-                                if (entry.hasItemStackOverride())
-                                    input.add(item.getItemStackOverride(registry));
-                                else
-                                    input.add(item.getItemStack(registry));
+                                final ItemStack stack = item.getItemStackOverride(registry);
+                                if(entry.getCount() > 1)
+                                    stack.setCount(entry.getCount());
+                                input.add(item.getItemStackOverride(registry));
                             });
                             ingredients.set(offset + i, Ingredient.ofStacks(input.stream()));
                         } else {
-                            if (entry.hasItemStackOverride())
-                                ingredients.set(offset + i, Ingredient.ofStacks(entry.getItemStackOverride(registry)));
-                            else
-                                ingredients.set(offset + i, Ingredient.ofStacks(entry.getItemStack(registry)));
+                            ingredients.set(offset + i, Ingredient.ofStacks(entry.getItemStackOverride(registry)));
                         }
                     } else {
                         throw new CodecException("Missing recipe key " + key);

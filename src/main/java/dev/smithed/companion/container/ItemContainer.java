@@ -95,7 +95,7 @@ public class ItemContainer {
         return itemStack;
     }
 
-    protected byte getCount() {
+    public byte getCount() {
         return count;
     }
 
@@ -132,7 +132,8 @@ public class ItemContainer {
      */
     public ItemStack getItemStackOverride(Registry<DatapackItem> registry) {
         if(!hasItemStackOverride())
-            return this.getItemStack();
+            return this.getItemStack(registry);
+
         final ItemStack base = this.getItemStack(registry);
         final ItemStack out = this.itemStackOverride.contains("id", NbtCompound.STRING_TYPE)
                 ? new ItemStack(Registries.ITEM.get(new Identifier(this.itemStackOverride.getString("id"))))
