@@ -33,7 +33,7 @@ public class ShortcutUtils {
         dispatcher.register(literal(data.getAlias()).requires(source -> source.hasPermissionLevel(data.getPermissionLevel())).executes(ctx -> {
             ServerCommandSource source = ctx.getSource();
             CommandFunctionManager manager = source.getServer().getCommandFunctionManager();
-            Optional<CommandFunction> function = manager.getFunction(data.getFunction());
+            var function = manager.getFunction(data.getFunction());
             function.ifPresent(commandFunction -> manager.execute(commandFunction, source));
             return 1;
         }));

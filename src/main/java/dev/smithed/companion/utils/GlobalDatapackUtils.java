@@ -1,19 +1,18 @@
 package dev.smithed.companion.utils;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resource.FileResourcePackProvider;
-import net.minecraft.resource.ResourcePackProfile;
-import net.minecraft.resource.ResourcePackSource;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.*;
+import net.minecraft.resource.FileResourcePackProvider.PackOpenerImpl;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
+import net.minecraft.util.path.SymlinkEntry;
+import net.minecraft.util.path.SymlinkFinder;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static net.minecraft.resource.ResourcePackSource.getSourceTextSupplier;
@@ -40,6 +39,7 @@ public class GlobalDatapackUtils {
         private static final FileFilter PACK_FILTER = (file) -> (file.isFile() && file.getName().endsWith(".zip")) || (file.isDirectory() && (new File(file, "pack.mcmeta")).isFile());
         private static final ResourcePackSource SMITHED_PACK_SOURCE = ResourcePackSource.create(getSourceTextSupplier("pack.source.smithed"), true);
         public List<String> orderedSmithedPacks = new ArrayList<>();
+        private static final SymlinkFinder finder = new SymlinkFinder(path -> true);
 
         /**
          * The datapack provider for smithed global datapacks
@@ -48,31 +48,37 @@ public class GlobalDatapackUtils {
          * @param source the source of the provider
          */
         public SmithedDataPackProvider(Path packsDir, ResourceType type, ResourcePackSource source) {
-            super(packsDir, ResourceType.SERVER_DATA, source);
+            super(packsDir, ResourceType.SERVER_DATA, source, finder);
         }
 
         @Override
         public void register(Consumer<ResourcePackProfile> profileAdder) {
+            // EVERY TOOL IS A HAMMER IF YOU TRY HARD ENOUGH
+            PackOpenerImpl packOpenerImpl = new PackOpenerImpl(finder, false);
             List<File> packs = List.of(Objects.requireNonNull(smithedDataPacks.listFiles(PACK_FILTER)));
 
             packs.forEach(file -> {
-                String packName = file.getName();
-                ResourcePackProfile profile = ResourcePackProfile.of(
-                    packName,
-                        Text.literal("SmithedPack"),
-                        true,
-                        getFactory(file.toPath(), true),
-                        new ResourcePackProfile.Metadata(Text.literal("Smithed datapacks"), 20, FeatureSet.empty()),
-                        ResourceType.SERVER_DATA,
-                        ResourcePackProfile.InsertionPosition.TOP,
-                        true,
-                        SMITHED_PACK_SOURCE
-                );
+                List<SymlinkEntry> list = new ArrayList<>();
+                try {
+                    var factory = packOpenerImpl.open(file.toPath(), list);
 
-                profileAdder.accept(profile);
+                    var packName = file.getName();
+                    var profile = createSmithedProfile(packName, factory);
+
+                    profileAdder.accept(profile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
             });
 
             super.register(profileAdder);
         }
+
+        private static ResourcePackProfile createSmithedProfile(String packName, ResourcePackProfile.PackFactory packFactory) {
+            return ResourcePackProfile.create(packName, Text.literal("Smithed Pack"), true, packFactory, ResourceType.SERVER_DATA, ResourcePackProfile.InsertionPosition.TOP, SMITHED_PACK_SOURCE);
+        }
+
     }
+
 }
