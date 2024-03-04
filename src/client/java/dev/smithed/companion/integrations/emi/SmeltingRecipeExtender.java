@@ -14,12 +14,12 @@ import net.minecraft.util.Identifier;
  */
 public class SmeltingRecipeExtender extends AbstractCookingRecipe {
 
-    public SmeltingRecipeExtender(RecipeType<?> type, Identifier id, String group, CookingRecipeCategory category, Ingredient input, ItemStack output, float experience, int cookTime) {
-        super(type, id, group, category, input, output, experience, cookTime);
+    public SmeltingRecipeExtender(RecipeType<?> type, String group, CookingRecipeCategory category, Ingredient ingredient, ItemStack result, float experience, int cookingTime) {
+        super(type, group, category, ingredient, result, experience, cookingTime);
     }
 
-    public SmeltingRecipeExtender(RecipeType<?> type, Identifier id, CookingRecipeCategory category, Ingredient input, ItemStack output) {
-        this(type, id, id.toString(), category, input, output, 0, 200);
+    public SmeltingRecipeExtender(RecipeType<?> type, String group, CookingRecipeCategory category, Ingredient ingredient, ItemStack result) {
+        super(type, group, category, ingredient, result, 0, 200);
     }
 
     @Override

@@ -5,15 +5,12 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.smithed.companion.container.BackgroundContainer;
 import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.util.Identifier;
 
 public class DispenserRecipe extends EmiRecipeExtender {
 
-    public DispenserRecipe(BackgroundContainer background, EmiRecipeCategory category, CraftingRecipe recipe) {
-        super(background, category, recipe, 166, 56);
-    }
-
-    public DispenserRecipe(EmiRecipeCategory category, CraftingRecipe recipe) {
-        this(null, category, recipe);
+    public DispenserRecipe(BackgroundContainer background, EmiRecipeCategory category, Identifier id, CraftingRecipe recipe) {
+        super(background, category, id, recipe, 166, 56);
     }
 
     @Override

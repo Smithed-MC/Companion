@@ -175,7 +175,7 @@ public class ComEmiPlugin implements EmiPlugin {
                 // Get recipe items
                 final DefaultedList<Ingredient> ingredients = recipe.computeRecipe(itemRegistry, width*height);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
-                final CraftingRecipe craftingRecipe = new ShapedRecipe(id, id.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output);
+                final CraftingRecipe craftingRecipe = new ShapedRecipe(id.toString(), CraftingRecipeCategory.MISC, new RawShapedRecipe(width, height, ingredients, Optional.empty()), output);
 
                 final List<EmiIngredient> emiIngredients = new ArrayList<>();
                 ingredients.forEach(ingredient -> emiIngredients.add(EmiIngredient.of(ingredient)));
@@ -188,15 +188,15 @@ public class ComEmiPlugin implements EmiPlugin {
                 // Create Recipe based on type
                 EmiRecipe recipeOut;
                 switch (invType) {
-                    case "chest", "barrel", "shulker_box" -> recipeOut = new ChestRecipe(background, emiCategory, craftingRecipe);
-                    case "dispenser", "dropper" -> recipeOut = new DispenserRecipe(background, emiCategory, craftingRecipe);
-                    case "hopper" -> recipeOut = new HopperRecipe(background, emiCategory, craftingRecipe);
+                    case "chest", "barrel", "shulker_box" -> recipeOut = new ChestRecipe(background, emiCategory, id, craftingRecipe);
+                    case "dispenser", "dropper" -> recipeOut = new DispenserRecipe(background, emiCategory, id, craftingRecipe);
+                    case "hopper" -> recipeOut = new HopperRecipe(background, emiCategory, id, craftingRecipe);
                     case "minecraft:crafting_table" -> recipeOut = new EmiCraftingRecipe(emiIngredients, EmiStack.of(output), id, false);
                     case "minecraft:brewing_stand" -> recipeOut = new EmiBrewingRecipe(emiIngredients.get(0).getEmiStacks().get(0), emiIngredients.get(1), EmiStack.of(output), id);
-                    case "minecraft:furnace" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.SMELTING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
-                    case "minecraft:blast_furnace" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.BLASTING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
-                    case "minecraft:smoker" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.SMOKING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
-                    case "minecraft:campfire" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.CAMPFIRE_COOKING, id, CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:furnace" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.SMELTING, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:blast_furnace" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.BLASTING, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:smoker" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.SMOKING, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
+                    case "minecraft:campfire" -> recipeOut = new EmiCookingRecipe(new SmeltingRecipeExtender(RecipeType.CAMPFIRE_COOKING, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output), emiCategory, 1, false);
                     case "minecraft:smithing_table" -> recipeOut = new EmiSmithingRecipe(emiIngredients.get(0), emiIngredients.get(1), emiIngredients.get(2), EmiStack.of(output), id);
                     default -> recipeOut = null;
                 }
