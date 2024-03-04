@@ -1,2 +1,4 @@
 accessWidener v1 named
 accessible method net/minecraft/resource/ResourcePackSource getSourceTextSupplier (Ljava/lang/String;)Ljava/util/function/UnaryOperator;
+accessible class net/minecraft/resource/FileResourcePackProvider$PackOpenerImpl
+accessible method net/minecraft/resource/FileResourcePackProvider$PackOpenerImpl <init> (Lnet/minecraft/util/path/SymlinkFinder;Z)V
