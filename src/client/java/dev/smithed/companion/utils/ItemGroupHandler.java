@@ -65,7 +65,7 @@ public class ItemGroupHandler {
                                 try {
                                     entries.add(entry.getItemStack(datapackItemRegistry).copyWithCount(1));
                                 } catch (Exception e) {
-                                    LOGGER.warn("Failed to add item to itemGroup" + itemGroupRegistry.getId(itemGroupData) + ". " + e.getLocalizedMessage());
+                                    LOGGER.warn("Failed to add item " + entry.toString() + " to itemGroup " + itemGroupRegistry.getId(itemGroupData) + ". " + e.getLocalizedMessage());
                                 }
                             })
                         ).build();

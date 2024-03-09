@@ -9,6 +9,7 @@ import dev.smithed.companion.container.BackgroundContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.util.Identifier;
 
 /**
  * Implements EMI's recipes. Handles ingredients & rending the background.
@@ -17,15 +18,15 @@ public abstract class EmiRecipeExtender extends BasicEmiRecipe {
 
     private final BackgroundContainer background;
 
-    public EmiRecipeExtender(BackgroundContainer background, EmiRecipeCategory category , CraftingRecipe recipe, int width, int height) {
-        super(category, recipe.getId(), width, height);
+    public EmiRecipeExtender(BackgroundContainer background, EmiRecipeCategory category, Identifier id, CraftingRecipe recipe, int width, int height) {
+        super(category, id, width, height);
         this.background = background;
 
         final ClientWorld world = MinecraftClient.getInstance().world;
         assert world != null : "Client world is null ?? !!";
 
         recipe.getIngredients().forEach(ingredient -> this.inputs.add(EmiIngredient.of(ingredient)));
-        this.outputs.add(EmiStack.of(recipe.getOutput(world.getRegistryManager())));
+        this.outputs.add(EmiStack.of(recipe.getResult(world.getRegistryManager())));
     }
 
     @Override

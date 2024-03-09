@@ -54,7 +54,6 @@ public class JeiPlugin implements IModPlugin {
         return ID;
     }
 
-    private static final Map<Item,AllNbtSubtype> SUBTYPES = new HashMap<>();
     private static final Map<Identifier,RecipeType<CraftingRecipe>> RECIPETYPES = new HashMap<>();
 
     /**
@@ -70,28 +69,24 @@ public class JeiPlugin implements IModPlugin {
         if(world == null)
             return;
 
-        SUBTYPES.clear();
         final Registry<DatapackItem> registry =  world.getRegistryManager().get(RegistryUtils.DATAPACK_ITEM_REGISTRY);
+        final Set<Item> itemSet = new HashSet<>();
 
-        // Collect all DatapackItems into a map of base_item:subtype
+        // Register subtype for each unique item instance
         registry.forEach(datapackItem -> {
-            final ItemStack item = datapackItem.stack();
-            SUBTYPES.putIfAbsent(item.getItem(), new AllNbtSubtype());
-            final Identifier id = registry.getId(datapackItem);
-            if(id == null) return;
-            SUBTYPES.get(item.getItem()).putSubtype(item.getNbt(), id.toString());
-        });
-        // Register map entries of base_item:subtype with JEI
-        for(Map.Entry<Item,AllNbtSubtype> entry: SUBTYPES.entrySet()) {
-            if(registration instanceof SubtypeRegistration subtype) {
-                Optional<IIngredientSubtypeInterpreter<ItemStack>> interpreter = subtype.getInterpreters().get(VanillaTypes.ITEM_STACK, new ItemStack(entry.getKey()));
-                if(interpreter.isPresent()) {
-                    LOGGER.warn("Failed to register subtype for " + entry.getKey() + ". JEI probably registers its own subtype for this item.");
-                    return;
+            final Item item = datapackItem.stack().getItem();
+            if(!itemSet.contains(item)) {
+                itemSet.add(item);
+                if(registration instanceof SubtypeRegistration subtype) {
+                    Optional<IIngredientSubtypeInterpreter<ItemStack>> interpreter = subtype.getInterpreters().get(VanillaTypes.ITEM_STACK, new ItemStack(item));
+                    if(interpreter.isPresent()) {
+                        LOGGER.warn("Failed to register subtype for " + item + ". JEI probably registers its own subtype for this item.");
+                        return;
+                    }
                 }
+                registration.registerSubtypeInterpreter(item, new SubtypeExtender<>());
             }
-            registration.registerSubtypeInterpreter(entry.getKey(), entry.getValue());
-        }
+        });
     }
 
     /**
@@ -187,16 +182,38 @@ public class JeiPlugin implements IModPlugin {
 
                 final DefaultedList<Ingredient> ingredients = recipe.computeRecipe(itemRegistry, width*height);
                 final ItemStack output = recipe.result().getItemStack(itemRegistry);
+                final RawShapedRecipe rawRecipe = new RawShapedRecipe(width, height, ingredients, Optional.empty());
 
                 switch (recipe.category().toString()) {
-                    case "minecraft:crafting_table" -> registration.addRecipes(RecipeTypes.CRAFTING, List.of(new ShapedRecipe(id, id.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output)));
-                    case "minecraft:furnace" -> registration.addRecipes(RecipeTypes.SMELTING, List.of(new SmeltingRecipe(id, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200)));
-                    case "minecraft:blast_furnace" -> registration.addRecipes(RecipeTypes.BLASTING, List.of(new BlastingRecipe(id, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200)));
-                    case "minecraft:smoker" -> registration.addRecipes(RecipeTypes.SMOKING, List.of(new SmokingRecipe(id, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200)));
-                    case "minecraft:campfire" -> registration.addRecipes(RecipeTypes.CAMPFIRE_COOKING, List.of(new CampfireCookingRecipe(id, id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200)));
-                    case "minecraft:smithing_table" -> registration.addRecipes(RecipeTypes.SMITHING, List.of(new SmithingTransformRecipe(id, ingredients.get(0), ingredients.get(1), ingredients.get(2), output)));
-                    case "minecraft:brewing_stand" -> registration.addRecipes(RecipeTypes.BREWING, List.of(new JeiBrewingRecipe(List.of(ingredients.get(1).getMatchingStacks()), List.of(ingredients.get(0).getMatchingStacks()), output, new BrewingRecipeExtender(id, output))));
-                    default -> registration.addRecipes(RECIPETYPES.get(recipe.category()), List.of(new ShapedRecipe(id, id.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output)));
+                    case "minecraft:crafting_table" -> {
+                        final RecipeEntry<CraftingRecipe> entry = new RecipeEntry<>(id, new ShapedRecipe(id.toString(), CraftingRecipeCategory.MISC, rawRecipe, output));
+                        registration.addRecipes(RecipeTypes.CRAFTING, List.of(entry));
+                    }
+                    case "minecraft:furnace" -> {
+                        final RecipeEntry<SmeltingRecipe> entry = new RecipeEntry<>(id, new SmeltingRecipe(id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200));
+                        registration.addRecipes(RecipeTypes.SMELTING, List.of(entry));
+                    }
+                    case "minecraft:blast_furnace" -> {
+                        final RecipeEntry<BlastingRecipe> entry = new RecipeEntry<>(id, new BlastingRecipe(id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200));
+                        registration.addRecipes(RecipeTypes.BLASTING, List.of(entry));
+                    }
+                    case "minecraft:smoker" -> {
+                        final RecipeEntry<SmokingRecipe> entry = new RecipeEntry<>(id, new SmokingRecipe(id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200));
+                        registration.addRecipes(RecipeTypes.SMOKING, List.of(entry));
+                    }
+                    case "minecraft:campfire" -> {
+                        final RecipeEntry<CampfireCookingRecipe> entry = new RecipeEntry<>(id, new CampfireCookingRecipe(id.toString(), CookingRecipeCategory.MISC, ingredients.get(0), output, 0, 200));
+                        registration.addRecipes(RecipeTypes.CAMPFIRE_COOKING, List.of(entry));
+                    }
+                    case "minecraft:smithing_table" -> {
+                        final RecipeEntry<SmithingRecipe> entry = new RecipeEntry<>(id, new SmithingTransformRecipe(ingredients.get(0), ingredients.get(1), ingredients.get(2), output));
+                        registration.addRecipes(RecipeTypes.SMITHING, List.of(entry));
+                    }
+                    case "minecraft:brewing_stand" -> {
+                        final JeiBrewingRecipe entry = new JeiBrewingRecipe(List.of(ingredients.get(1).getMatchingStacks()), List.of(ingredients.get(0).getMatchingStacks()), output, new BrewingRecipeExtender(id, output));
+                        registration.addRecipes(RecipeTypes.BREWING, List.of(entry));
+                    }
+                    default -> registration.addRecipes(RECIPETYPES.get(recipe.category()), List.of(new ShapedRecipe(id.toString(), CraftingRecipeCategory.MISC, rawRecipe, output)));
                 }
             } catch(Exception e) {
                 LOGGER.warn("Failed to parse smithed recipe " + id + ". " + e.getLocalizedMessage());
@@ -215,10 +232,10 @@ public class JeiPlugin implements IModPlugin {
         if(world == null)
             return;
 
-        final List<CraftingRecipe> recipes = new ArrayList<>();
+        final List<RecipeEntry<CraftingRecipe>> recipes = new ArrayList<>();
         // For every recipe registered in JEI, remove it if the output is a knowledge book.
         jeiRuntime.getRecipeManager().createRecipeLookup(RecipeTypes.CRAFTING).get().forEach(recipe -> {
-            if(recipe.getOutput(world.getRegistryManager()).getItem() == Items.KNOWLEDGE_BOOK)
+            if(recipe.value().getResult(world.getRegistryManager()).getItem() == Items.KNOWLEDGE_BOOK)
                 recipes.add(recipe);
         });
         jeiRuntime.getRecipeManager().hideRecipes(RecipeTypes.CRAFTING, recipes);

@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -26,7 +27,7 @@ public abstract class RegistryMixin<T> implements RegistryUtils.RegistryHelper<T
 
 	@Shadow private boolean frozen;
 	@Shadow <T> void assertNotFrozen(RegistryKey<T> key) {}
-	@Shadow @Final private Object2IntMap<T> entryToRawId;
+	@Shadow @Final private Reference2IntMap<T> entryToRawId;
 	@Shadow @Final private ObjectList<RegistryEntry.Reference<T>> rawIdToEntry;
 	@Shadow @Final private Map<Identifier, RegistryEntry.Reference<T>> idToEntry;
 	@Shadow @Final private Map<RegistryKey<T>, RegistryEntry.Reference<T>> keyToEntry;

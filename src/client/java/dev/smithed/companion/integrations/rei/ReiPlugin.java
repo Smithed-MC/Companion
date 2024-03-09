@@ -126,7 +126,7 @@ public class ReiPlugin implements REIClientPlugin {
                 // Init recipe
                 final Display reiRecipe;
                 switch (invType) {
-                    case "minecraft:crafting_table" -> reiRecipe = DefaultCraftingDisplay.of(new ShapedRecipe(id, id.toString(), CraftingRecipeCategory.MISC, width, height, ingredients, output));
+                    case "minecraft:crafting_table" -> reiRecipe = DefaultCraftingDisplay.of(new RecipeEntry<>(id, new ShapedRecipe(id.toString(), CraftingRecipeCategory.MISC, new RawShapedRecipe(width, height, ingredients, Optional.empty()), output)));
                     case "minecraft:brewing_stand" -> reiRecipe = new DefaultBrewingDisplay(ingredients.get(0), ingredients.get(1), output);
                     case "minecraft:furnace" -> reiRecipe = new DefaultSmeltingDisplay(ReiUtils.convertIngredientList(ingredients), List.of(ReiUtils.convertItemStack(output)), smeltData);
                     case "minecraft:blast_furnace" -> reiRecipe = new DefaultBlastingDisplay(ReiUtils.convertIngredientList(ingredients), List.of(ReiUtils.convertItemStack(output)), smeltData);

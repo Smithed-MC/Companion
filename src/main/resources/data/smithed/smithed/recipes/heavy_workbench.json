@@ -6,8 +6,41 @@
   ],
   "key": {
     "L": {
-      "type" : "smithed:item_entry",
-      "id": "minecraft:oak_log"
+      "type" : "smithed:item_list",
+      "items": [
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:oak_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:spruce_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:birch_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:jungle_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:acacia_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:dark_oak_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:cherry_log"
+        },
+        {
+          "type" : "smithed:item_entry",
+          "id": "minecraft:mangrove_log"
+        }
+      ]
     },
     "C": {
       "type" : "smithed:item_entry",
@@ -20,7 +53,8 @@
   },
   "result": {
     "type" : "smithed:datapack_item_entry",
-    "id" : "smithed:super_tnt"
+    "id" : "smithed:super_tnt",
+    "count": 2
   },
   "category": "minecraft:crafting_table"
 }

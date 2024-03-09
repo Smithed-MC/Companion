@@ -22,7 +22,7 @@ public class DispenserCategory<T extends Display> extends DisplayCategoryExtende
 
     @Override
     public List<Widget> setupDisplay(T display, Rectangle bounds) {
-        final Point startPoint = new Point(bounds.getX()+56, bounds.getY()+7);
+        final Point startPoint = new Point(bounds.getX()+61, bounds.getY()+6);
         final List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
 

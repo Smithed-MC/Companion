@@ -3,8 +3,12 @@ package dev.smithed.companion.container;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.smithed.companion.registry.DatapackItem;
+import dev.smithed.companion.utils.NBTUtils;
 import io.netty.handler.codec.CodecException;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -19,12 +23,16 @@ public class ItemContainer {
     private final String type;
     private final Identifier id;
     private final ItemStack itemStack;
+    private final NbtCompound itemStackOverride;
+    private final byte count;
 
     public static final Codec<ItemContainer> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                 Codec.STRING.fieldOf("type").forGetter(ItemContainer::getType),
                 Identifier.CODEC.optionalFieldOf("id", new Identifier("")).forGetter(ItemContainer::getId),
-                ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ItemContainer::getItemStack)
+                ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ItemContainer::getItemStack),
+                NbtCompound.CODEC.optionalFieldOf("item_override", new NbtCompound()).forGetter(ItemContainer::getItemStackOverride),
+                Codec.BYTE.optionalFieldOf("count", (byte) 1).forGetter(ItemContainer::getCount)
         ).apply(instance, ItemContainer::new));
 
     /**
@@ -32,47 +40,67 @@ public class ItemContainer {
      * or if type 'datapack_item_entry' and an ID is present. Fail otherwise.
      * @param type String type, must be 'smithed:item_entry' or 'smithed:datapack_item_entry'
      * @param id ID of item for 'item_entry', where it is converted to an ItemStack. ID of DatapackItem for 'datapack_item_entry'
-     * @param itemStack If type is 'item_entry,' and ID is ommited, ItemStack is the item to return from this container
+     * @param itemStack If type is 'item_entry,' and ID is omitted, ItemStack is the item to return from this container
      */
-    private ItemContainer(String type, Identifier id, ItemStack itemStack) {
+    protected ItemContainer(String type, Identifier id, ItemStack itemStack, NbtCompound itemStackOverride, byte count, boolean extended) {
         final boolean isIdEmpty = id.getPath().equals("");
-        switch (type) {
-            // Fail if 'item_entry' and ID & itemStack are omitted
-            case "smithed:item_entry" -> {
-                if(isIdEmpty && itemStack == ItemStack.EMPTY)
-                    throw new CodecException("smithed:item_entry requires an 'id' field or an 'item' field");
-            }
-            // Fail it 'datapack_item_entry' and ID is omitted
-            case "smithed:datapack_item_entry" -> {
-                if(isIdEmpty)
-                    throw new CodecException("smithed:datapack_item_entry requires an 'id' field");
-            }
-            // Fail if type is invalid
-            default -> throw new CodecException("Invalid type " + type + ", expected 'smithed:datapack_item_entry' or 'smithed:item_entry'");
-        }
 
         this.type = type;
         this.id = id;
+        this.count = count;
+        this.itemStackOverride = itemStackOverride;
         // If no ID, save raw itemStack. Otherwise, convert item ID to an ItemStack
         // ItemStack is air if item is 'invalid,' ie. is a DatapackItem
         if(isIdEmpty)
             this.itemStack = itemStack;
         else
-            this.itemStack = new ItemStack(Registries.ITEM.get(this.id));
+            this.itemStack = new ItemStack(Registries.ITEM.get(id));
+
+        switch (type) {
+            // Fail if 'item_entry' and ID & itemStack are omitted
+            case "smithed:item_entry" -> {
+                if(isIdEmpty && itemStack == ItemStack.EMPTY)
+                    throw new CodecException("smithed:item_entry requires an 'id' field or an 'item' field");
+                if(this.itemStack.getItem() == Items.AIR)
+                    throw new CodecException("Invalid item ID provided to smithed:item_entry, " + id);
+            }
+            // Fail if 'datapack_item_entry' and ID is omitted
+            case "smithed:datapack_item_entry" -> {
+                if(isIdEmpty)
+                    throw new CodecException("smithed:datapack_item_entry requires an 'id' field");
+            }
+            // Fail if type is invalid
+            default -> {
+                if(!extended)
+                    throw new CodecException("Invalid type " + type + ", expected 'smithed:datapack_item_entry' or 'smithed:item_entry'");
+            }
+        }
     }
 
-    private String getType() {
+    private ItemContainer(String type, Identifier id, ItemStack itemStack, NbtCompound itemStackOverride, byte count) {
+        this(type, id, itemStack, itemStackOverride, count, false);
+    }
+
+    protected String getType() {
         return type;
     }
 
     @Nullable
-    private Identifier getId() {
+    protected Identifier getId() {
         return id;
     }
 
     @Nullable
-    private ItemStack getItemStack() {
+    protected ItemStack getItemStack() {
         return itemStack;
+    }
+
+    public byte getCount() {
+        return count;
+    }
+
+    protected NbtCompound getItemStackOverride() {
+        return this.itemStackOverride;
     }
 
     /**
@@ -84,16 +112,45 @@ public class ItemContainer {
      */
     public ItemStack getItemStack(Registry<DatapackItem> registry) {
         if(type.equals("smithed:item_entry")) {
-            return this.itemStack;
+            return this.itemStack.copyWithCount(this.count);
         }
         if(type.equals("smithed:datapack_item_entry")) {
                 final DatapackItem item = registry.get(this.id);
                 if(item != null)
-                    return item.stack();
+                    return item.stack().copyWithCount(this.count);
                 else
                     throw new CodecException("Unknown DatapackItem " + id);
         }
         return ItemStack.EMPTY;
+    }
+
+    /**
+     * Returns the base ItemStack merged with any modifications in item_override.
+     * Works best when modifying display & model information.
+     * @param registry Registry for DatapackItems
+     * @return Base item + modifications
+     */
+    public ItemStack getItemStackOverride(Registry<DatapackItem> registry) {
+        if(!hasItemStackOverride())
+            return this.getItemStack(registry);
+
+        final ItemStack base = this.getItemStack(registry);
+        final ItemStack out = this.itemStackOverride.contains("id", NbtCompound.STRING_TYPE)
+                ? new ItemStack(Registries.ITEM.get(new Identifier(this.itemStackOverride.getString("id"))))
+                : base;
+        out.setCount(base.getCount());
+        if(base.getNbt() != null)
+            out.setNbt(base.getNbt().copyFrom(this.itemStackOverride.getCompound("tag")));
+        else
+            out.setNbt(this.itemStackOverride.getCompound("tag"));
+        return out;
+    }
+
+    /**
+     * @return True if override exists
+     */
+    public boolean hasItemStackOverride() {
+        return this.itemStackOverride.getSize() > 0 && this.itemStackOverride.contains("tag", NbtCompound.COMPOUND_TYPE);
     }
 
     @Override
