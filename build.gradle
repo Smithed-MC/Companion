@@ -83,12 +83,11 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	// JEI
+	// JEI TODO: remove use of local jar if/when mapping issue is fixed
 	//modCompileOnlyApi "mezz.jei:jei-${project.minecraft_version}-common-api:${project.jei_version}"
 	//modCompileOnlyApi "mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}"
 	//modCompileOnly "mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}"
-	//modImplementation "mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}"
-	modImplementation files("libraries/jei/jei-1.20.4-fabric-17.3.0.49.jar")
+	modCompileOnly files("libraries/jei/jei-1.20.4-fabric-17.3.0.49.jar")
 
 	// EMI
 	modCompileOnly "dev.emi:emi-fabric:${project.emi_version}:api"
