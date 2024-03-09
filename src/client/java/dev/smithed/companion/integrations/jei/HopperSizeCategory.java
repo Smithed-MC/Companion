@@ -28,7 +28,7 @@ public class HopperSizeCategory<T extends Recipe<?>> extends DynamicCategory<T> 
             builder.addSlot(RecipeIngredientRole.INPUT, 18 * i + 38, 4).addIngredients(ingredient);
             i += 1;
         }
-        builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getOutput(world.getRegistryManager()));
+        builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getResult(world.getRegistryManager()));
     }
 
 }

@@ -28,7 +28,7 @@ public class DispenserSizeCategory<T extends Recipe<?>> extends DynamicCategory<
             builder.addSlot(RecipeIngredientRole.INPUT, 18 * (i%3) + 56, 18 * (i/3) + 1).addIngredients(ingredient);
             i += 1;
         }
-        builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getOutput(world.getRegistryManager()));
+        builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getResult(world.getRegistryManager()));
     }
 
 }

@@ -28,7 +28,7 @@ public class ChestSizeCategory<T extends Recipe<?>> extends DynamicCategory<T> {
             builder.addSlot(RecipeIngredientRole.INPUT, 18 * (i%9) + 2, 18 * (i/9) + 2).addIngredients(ingredient);
             i += 1;
         }
-        builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getOutput(world.getRegistryManager()));
+        builder.addSlot(RecipeIngredientRole.OUTPUT, -16384, 0).addItemStack(recipe.getResult(world.getRegistryManager()));
     }
 
 }
